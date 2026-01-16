@@ -28,4 +28,5 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
 <link id="color" rel="stylesheet" href="../assets/css/color-1.css" media="screen">
 <!-- Responsive css-->
+<link rel="stylesheet" type="text/css" href="../assets/css/vendors/sweetalert2.css">
 <link rel="stylesheet" type="text/css" href="../assets/css/responsive.css">

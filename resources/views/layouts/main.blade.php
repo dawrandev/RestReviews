@@ -25,6 +25,9 @@
     @include('partials.script')
 
     @stack('scripts')
+
+    @include('components.sweetalert-dynamic')
+    @include('components.alerts')
 </body>
 
 </html>

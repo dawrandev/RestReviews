@@ -31,22 +31,18 @@ class AuthService
     protected function determineRedirect($user): string
     {
         if ($user->hasRole('superadmin')) {
-            return route('dashboard.superadmin.index');
+            return route('superadmin.dashboard');
         }
 
         if ($user->hasRole('admin')) {
             if (!$user->restaurant) {
-                Auth::logout();
-                throw ValidationException::withMessages([
-                    'login' => __('К вам не прикреплен ресторан.'),
-                ]);
+                return route('admin.restaurants.create');
             }
-            return route('dashboard.admin.index');
+
+            return route('admin.dashboard');
         }
 
         Auth::logout();
-        throw ValidationException::withMessages([
-            'login' => __('У вас нет разрешения на доступ.'),
-        ]);
+        throw ValidationException::withMessages(['login' => __('Access denied.')]);
     }
 }

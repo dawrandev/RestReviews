@@ -17,9 +17,9 @@
             <div class="col-6">
                 <ol class="breadcrumb">
                     @role('superadmin')
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard.superadmin.index') }}"><i data-feather="home"></i></a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('superadmin.dashboard') }}"><i data-feather="home"></i></a></li>
                     @else
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard.admin.index') }}"><i data-feather="home"></i></a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i data-feather="home"></i></a></li>
                     @endrole
                     <li class="breadcrumb-item active">Рестораны</li>
                 </ol>

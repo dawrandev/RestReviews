@@ -17,5 +17,8 @@
  <!-- Theme js-->
  <script src="../assets/js/script.js"></script>
  <script src="../assets/js/theme-customizer/customizer.js"></script>
+
+ <script src="../assets/js/sweet-alert/sweetalert.min.js"></script>
+ <script src="../assets/js/sweet-alert/app.js"></script>
  <!-- login js-->
  <!-- Plugin used-->
