@@ -21,4 +21,9 @@ class RestaurantController extends Controller
 
         return view('pages.restaurants.index', compact('restaurants'));
     }
+
+    public function create()
+    {
+        return view('pages.restaurants.modals.create');
+    }
 }

@@ -11,8 +11,8 @@ class RestaurantRepository
         return Restaurant::paginate(10);
     }
 
-    public function getById($id)
+    public function getByUserId($userId)
     {
-        return Restaurant::where('id', $id)->paginate(10);
+        return Restaurant::where('user_id', $userId)->paginate(10);
     }
 }

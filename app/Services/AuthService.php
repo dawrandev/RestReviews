@@ -36,7 +36,7 @@ class AuthService
 
         if ($user->hasRole('admin')) {
             if (!$user->restaurant) {
-                return route('admin.restaurants.create');
+                return route('restaurants.index', ['create' => 1]);
             }
 
             return route('admin.dashboard');

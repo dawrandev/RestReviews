@@ -16,6 +16,6 @@ class RestaurantService
             return $this->restaurantRepository->getAll();
         }
 
-        return $this->restaurantRepository->getById($user->restaurant_id);
+        return $this->restaurantRepository->getByUserId($user->id);
     }
 }

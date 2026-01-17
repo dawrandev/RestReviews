@@ -57,7 +57,7 @@
                         <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     @endif
-
+                    @can('restaurant-search')
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -76,6 +76,7 @@
                             </div>
                         </div>
                     </div>
+                    @endcan
 
                     @if($restaurants->count() > 0)
                     <div class="row">
@@ -182,15 +183,16 @@
                         {{ $restaurants->links() }}
                     </div>
                     @else
-                    <div class="alert alert-light text-center" role="alert">
-                        <i class="fa fa-info-circle fa-2x mb-3 d-block"></i>
-                        @if(auth()->user()->hasPermissionTo('restaurant-create'))
-                        <p>Пока не добавлено ни одного ресторана.</p>
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createRestaurantModal">
-                            <i class="fa fa-plus"></i> Добавить первый ресторан
+                    <div class="alert alert-light text-center py-5" role="alert">
+                        <i class="fa fa-store fa-3x mb-3 text-primary d-block"></i>
+                        @if(auth()->user()->hasRole('admin'))
+                        <h4 class="mb-3">Добро пожаловать, {{ auth()->user()->name }}!</h4>
+                        <p class="mb-4 text-muted">Для начала работы вам необходимо зарегистрировать свой ресторан в системе.</p>
+                        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createRestaurantModal">
+                            <i class="fa fa-plus-circle me-2"></i> Создать мой ресторан
                         </button>
                         @else
-                        <p>Вам еще не назначен ресторан. Свяжитесь с администратором.</p>
+                        <p>Пока не добавлено ни одного ресторана.</p>
                         @endif
                     </div>
                     @endif
@@ -208,4 +210,35 @@
 
 @push('scripts')
 <script src="{{ asset('js/restaurants/index.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Blade ma'lumotlarini JS o'zgaruvchilariga olamiz
+        const isCreateMode = new URLSearchParams(window.location.search).get('create') === '1';
+        const isAdmin = {
+            {
+                auth() - > user() - > hasRole('admin') ? 'true' : 'false'
+            }
+        };
+
+        if (isCreateMode) {
+            const modalElement = document.getElementById('createRestaurantModal');
+
+            if (modalElement) {
+                const myModal = new bootstrap.Modal(modalElement, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                myModal.show();
+
+                if (isAdmin) {
+                    const closeBtn = modalElement.querySelector('.btn-close');
+                    const cancelBtn = modalElement.querySelector('.btn-outline-secondary');
+
+                    if (closeBtn) closeBtn.style.display = 'none';
+                    if (cancelBtn) cancelBtn.style.display = 'none';
+                }
+            }
+        }
+    });
+</script>
 @endpush

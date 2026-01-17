@@ -14,25 +14,20 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $permissions = [
-            'restaurant-list',
-            'restaurant-create',
-            'restaurant-edit',
-            'restaurant-delete',
-            'restaurant-view',
-        ];
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+        foreach (\App\Permissions\RestaurantPermissions::all() as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
-        $superadmin = Role::create(['name' => 'superadmin']);
-        $superadmin->givePermissionTo(Permission::all());
+        $superadmin = Role::firstOrCreate(['name' => 'superadmin']);
+        $superadmin->syncPermissions(Permission::all());
 
-        $admin = Role::create(['name' => 'admin']);
-        $admin->givePermissionTo([
-            'restaurant-view',
-            'restaurant-edit'
+        $admin = Role::firstOrCreate(['name' => 'admin']);
+        $admin->syncPermissions([
+            \App\Permissions\RestaurantPermissions::VIEW,
+            \App\Permissions\RestaurantPermissions::UPDATE,
+            \App\Permissions\RestaurantPermissions::CREATE,
         ]);
     }
 }
