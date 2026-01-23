@@ -277,11 +277,20 @@
                             data: formData,
                             processData: false,
                             contentType: false,
-                            dataType: 'json',
-                            success: function(response) {
+                            success: function(response, textStatus, xhr) {
                                 console.log('Success response:', response);
 
-                                if (response.success || response.message || response.restaurant) {
+                                // Parse response if it's a string
+                                if (typeof response === 'string') {
+                                    try {
+                                        response = JSON.parse(response);
+                                    } catch (e) {
+                                        console.log('Response is not JSON, treating as success');
+                                        response = { success: true };
+                                    }
+                                }
+
+                                if (response.success || response.message || response.restaurant || xhr.status === 201 || xhr.status === 200) {
                                     swal({
                                         title: "Успешно!",
                                         text: response.message || "Ресторан успешно создан",
@@ -443,11 +452,20 @@
                             data: formData,
                             processData: false,
                             contentType: false,
-                            dataType: 'json',
-                            success: function(response) {
+                            success: function(response, textStatus, xhr) {
                                 console.log('Success response:', response);
 
-                                if (response.success || response.message || response.restaurant) {
+                                // Parse response if it's a string
+                                if (typeof response === 'string') {
+                                    try {
+                                        response = JSON.parse(response);
+                                    } catch (e) {
+                                        console.log('Response is not JSON, treating as success');
+                                        response = { success: true };
+                                    }
+                                }
+
+                                if (response.success || response.message || response.restaurant || xhr.status === 200) {
                                     swal({
                                         title: "Успешно!",
                                         text: response.message || "Ресторан успешно обновлен",
@@ -470,8 +488,17 @@
                             error: function(xhr) {
                                 console.error('Error response:', xhr);
 
+                                // Try to parse responseText if responseJSON is not available
+                                let errors = null;
                                 if (xhr.status === 422) {
-                                    let errors = xhr.responseJSON.errors;
+                                    try {
+                                        errors = xhr.responseJSON ? xhr.responseJSON.errors : JSON.parse(xhr.responseText).errors;
+                                    } catch (e) {
+                                        errors = null;
+                                    }
+                                }
+
+                                if (errors) {
                                     let errorList = '<ul style="text-align: left; margin: 0; padding-left: 20px;">';
                                     Object.keys(errors).forEach(function(key) {
                                         errors[key].forEach(function(error) {
@@ -581,20 +608,70 @@
                     $('#no-qr-code').show();
                 }
 
-                // Images
+                // Images - Owl Carousel
+                let carousel = $('#restaurant-images-carousel');
+                carousel.trigger('destroy.owl.carousel');
+                carousel.html('');
+
                 if (data.images && data.images.length > 0) {
-                    let imagesHtml = '';
                     data.images.forEach(function(img) {
-                        imagesHtml += '<div class="mb-2">';
-                        imagesHtml += '<img src="' + img.url + '" class="img-fluid rounded" alt="Image">';
+                        let imgItem = '<div class="item">';
+                        imgItem += '<img src="' + img.url + '" class="img-fluid" alt="Restaurant Image" style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px;">';
                         if (img.is_cover) {
-                            imagesHtml += '<span class="badge badge-success mt-1">Обложка</span>';
+                            imgItem += '<div class="text-center mt-2"><span class="badge badge-success">Обложка</span></div>';
                         }
-                        imagesHtml += '</div>';
+                        imgItem += '</div>';
+                        carousel.append(imgItem);
                     });
-                    $('#show-images').html(imagesHtml);
                 } else {
-                    $('#show-images').html('<p class="text-muted">Нет изображений</p>');
+                    carousel.append('<div class="item text-center"><div class="alert alert-light"><i class="fa fa-image fa-3x mb-2 text-muted d-block"></i><p class="mb-0">Нет изображений</p></div></div>');
+                }
+
+                carousel.owlCarousel({
+                    items: 1,
+                    loop: data.images && data.images.length > 1,
+                    margin: 10,
+                    nav: true,
+                    dots: true,
+                    autoplay: true,
+                    autoplayTimeout: 3000,
+                    autoplayHoverPause: true,
+                    navText: ['<i class="fa fa-chevron-left"></i>', '<i class="fa fa-chevron-right"></i>']
+                });
+
+                // Operating Hours
+                const daysOfWeek = {
+                    0: 'Воскресенье',
+                    1: 'Понедельник',
+                    2: 'Вторник',
+                    3: 'Среда',
+                    4: 'Четверг',
+                    5: 'Пятница',
+                    6: 'Суббота'
+                };
+
+                if (data.operating_hours && data.operating_hours.length > 0) {
+                    let hoursHtml = '<div class="table-responsive"><table class="table table-sm table-bordered mb-0">';
+                    hoursHtml += '<thead><tr><th>День</th><th>Открытие</th><th>Закрытие</th><th>Статус</th></tr></thead><tbody>';
+
+                    data.operating_hours.forEach(function(oh) {
+                        hoursHtml += '<tr>';
+                        hoursHtml += '<td><small>' + daysOfWeek[oh.day_of_week] + '</small></td>';
+                        if (oh.is_closed) {
+                            hoursHtml += '<td colspan="2" class="text-center"><small class="text-muted">-</small></td>';
+                            hoursHtml += '<td><span class="badge badge-danger badge-sm">Выходной</span></td>';
+                        } else {
+                            hoursHtml += '<td><small>' + (oh.opening_time || '-') + '</small></td>';
+                            hoursHtml += '<td><small>' + (oh.closing_time || '-') + '</small></td>';
+                            hoursHtml += '<td><span class="badge badge-success badge-sm">Работает</span></td>';
+                        }
+                        hoursHtml += '</tr>';
+                    });
+
+                    hoursHtml += '</tbody></table></div>';
+                    $('#show-operating-hours').html(hoursHtml);
+                } else {
+                    $('#show-operating-hours').html('<small class="text-muted">Режим работы не указан</small>');
                 }
 
                 // Update edit button
@@ -669,10 +746,9 @@
             success: function(data) {
                 $('#edit_restaurant_id').val(data.id);
 
-                var userRole = '{{ auth()->user()->hasRole("admin") ? "admin" : "superadmin" }}';
-                if (userRole !== 'admin') {
-                    $('#edit_brand_id').val(data.brand_id);
-                }
+                // Set brand (read-only)
+                $('#edit_brand_id').val(data.brand_id);
+                $('#edit_brand_name_display').val(data.brand || 'N/A');
 
                 $('#edit_city_id').val(data.city_id);
                 $('#edit_branch_name').val(data.branch_name);
@@ -708,6 +784,25 @@
                     $('#edit_images_preview').html(imagesHtml);
                 } else {
                     $('#edit_images_preview').html('<div class="col-12"><p class="text-muted text-center">Нет загруженных фотографий</p></div>');
+                }
+
+                // Load operating hours
+                if (data.operating_hours && data.operating_hours.length > 0) {
+                    data.operating_hours.forEach(function(oh) {
+                        let dayNum = oh.day_of_week;
+                        $('#edit_opening_time_' + dayNum).val(oh.opening_time || '');
+                        $('#edit_closing_time_' + dayNum).val(oh.closing_time || '');
+                        $('#edit_is_closed_' + dayNum).prop('checked', oh.is_closed);
+
+                        // Disable time inputs if closed
+                        if (oh.is_closed) {
+                            $('#edit_opening_time_' + dayNum).prop('disabled', true);
+                            $('#edit_closing_time_' + dayNum).prop('disabled', true);
+                        } else {
+                            $('#edit_opening_time_' + dayNum).prop('disabled', false);
+                            $('#edit_closing_time_' + dayNum).prop('disabled', false);
+                        }
+                    });
                 }
 
                 let updateUrl = "{{ route('restaurants.update', ':id') }}".replace(':id', data.id);
@@ -754,27 +849,63 @@
             dangerMode: true,
         }).then((willDelete) => {
             if (willDelete) {
-                let url = "{{ url('restaurants/images') }}/" + imageId;
+                let url = "{{ route('restaurants.images.delete', ':id') }}".replace(':id', imageId);
 
                 $.ajax({
                     url: url,
                     method: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        $('#image-' + imageId).remove();
-                        swal({
-                            title: "Удалено!",
-                            text: "Изображение успешно удалено",
-                            icon: "success",
-                            button: "ОК",
-                        });
+                        console.log('Delete response:', response);
+
+                        // Parse response if it's a string
+                        if (typeof response === 'string') {
+                            try {
+                                response = JSON.parse(response);
+                            } catch (e) {
+                                response = { success: true };
+                            }
+                        }
+
+                        if (response.success) {
+                            $('#image-' + imageId).fadeOut(300, function() {
+                                $(this).remove();
+                            });
+                            swal({
+                                title: "Удалено!",
+                                text: response.message || "Изображение успешно удалено",
+                                icon: "success",
+                                button: "ОК",
+                            });
+                        } else {
+                            swal({
+                                title: "Ошибка!",
+                                text: response.message || "Ошибка при удалении изображения",
+                                icon: "error",
+                                button: "Закрыть",
+                            });
+                        }
                     },
                     error: function(xhr) {
+                        console.error('Delete error:', xhr);
+                        let errorMessage = "Ошибка при удалении изображения";
+
+                        try {
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            } else if (xhr.responseText) {
+                                let parsed = JSON.parse(xhr.responseText);
+                                errorMessage = parsed.message || errorMessage;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing response:', e);
+                        }
+
                         swal({
                             title: "Ошибка!",
-                            text: "Ошибка при удалении изображения",
+                            text: errorMessage,
                             icon: "error",
                             button: "Закрыть",
                         });
@@ -793,12 +924,25 @@
         }, 500);
     });
 
-    // Auto-open modal
-    var needsRestaurant = {
-        {
-            isset($needsRestaurant) && $needsRestaurant ? 'true' : 'false'
+    // Operating hours - disable/enable time inputs based on checkbox
+    $(document).on('change', '.is-closed-check', function() {
+        let day = $(this).data('day');
+        let isChecked = $(this).is(':checked');
+        let modalId = $(this).closest('.modal').attr('id');
+
+        let prefix = modalId === 'editRestaurantModal' ? 'edit_' : '';
+
+        if (isChecked) {
+            $(`input[name="operating_hours[${day}][opening_time]"]`).prop('disabled', true).val('');
+            $(`input[name="operating_hours[${day}][closing_time]"]`).prop('disabled', true).val('');
+        } else {
+            $(`input[name="operating_hours[${day}][opening_time]"]`).prop('disabled', false);
+            $(`input[name="operating_hours[${day}][closing_time]"]`).prop('disabled', false);
         }
-    };
+    });
+
+    // Auto-open modal
+    var needsRestaurant = {{ isset($needsRestaurant) && $needsRestaurant ? 'true' : 'false' }};
     if (needsRestaurant) {
         $(document).ready(function() {
             var createModal = new bootstrap.Modal(document.getElementById('createRestaurantModal'));

@@ -20,67 +20,74 @@
                         <div class="mobile-back text-end"><span>Back</span><i class="fa fa-angle-right ps-2" aria-hidden="true"></i></div>
                     </li>
 
-                    @can('viewAny', \App\Models\Restaurant::class)
-                    @if(auth()->user()->restaurant || auth()->user()->hasRole('superadmin'))
-                    @php $dashboardRoute = auth()->user()->hasRole('superadmin') ? 'superadmin.dashboard' : 'admin.dashboard'; @endphp
+                    @php
+                    $user = auth()->user();
+                    $isSuperAdmin = $user->hasRole('superadmin');
+                    // Restorani borligini tekshirish (hasMany bo'lsa ham, hasOne bo'lsa ham ishlaydi)
+                    $hasRestaurant = $user->restaurants()->exists();
+                    @endphp
+
+                    {{-- 1. Dashboard: Faqat superadmin yoki kamida 1ta restorani bor adminlar uchun --}}
+                    @if($isSuperAdmin || $hasRestaurant)
+                    @php $dashboardRoute = $isSuperAdmin ? 'superadmin.dashboard' : 'admin.dashboard'; @endphp
                     <li class="sidebar-list {{ request()->routeIs($dashboardRoute) ? 'active' : '' }}">
                         <a class="sidebar-link sidebar-title link-nav" href="{{ route($dashboardRoute) }}">
                             <i data-feather="monitor"></i><span>Панель управления</span>
                         </a>
                     </li>
                     @endif
-                    @endcan
 
-                    @can('viewAny', \App\Models\User::class)
+                    {{-- 2. Administratorlar (Faqat Superadmin ko'radi) --}}
+                    @if($isSuperAdmin)
                     <li class="sidebar-list {{ request()->routeIs('users.*') ? 'active' : '' }}">
                         <a class="sidebar-link sidebar-title link-nav" href="{{ route('users.index') }}">
                             <i data-feather="users"></i><span>Администраторы</span>
                         </a>
                     </li>
-                    @endcan
+                    @endif
 
+                    {{-- 3. Restoranlar bo'limi (Superadmin barcha restaranlarni ko'radi, Admin o'z restaranlarini ko'radi) --}}
+                    @if($isSuperAdmin || $user->hasRole('admin'))
                     <li class="sidebar-list {{ request()->routeIs('restaurants.*') ? 'active' : '' }}">
                         @php
-                        $hasNoRestaurant = auth()->user()->hasRole('admin') && !auth()->user()->restaurant;
-                        $targetRoute = $hasNoRestaurant ? route('restaurants.index', ['create' => 1]) : route('restaurants.index');
-                        $label = $hasNoRestaurant ? 'Создать ресторан' : 'Рестораны';
+                        // Agar admin bo'lsa va hali birorta ham restorani bo'lmasa
+                        $showCreateFirst = $user->hasRole('admin') && !$hasRestaurant;
+                        $resRoute = $showCreateFirst ? route('restaurants.index', ['create' => 1]) : route('restaurants.index');
+                        $resLabel = $isSuperAdmin ? 'Рестораны' : ($showCreateFirst ? 'Создать ресторан':'Мои рестораны');
                         @endphp
-
-                        @can('viewAny', \App\Models\Restaurant::class)
-                        <a class="sidebar-link sidebar-title link-nav" href="{{ $targetRoute }}">
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ $resRoute }}">
                             <i data-feather="home"></i>
-                            <span>{{ $label }}</span>
+                            <span>{{$resLabel }}</span>
                         </a>
-                        @endcan
                     </li>
+                    @endif
 
-                    @can('viewAny', \App\Models\Category::class)
-                    <li class="sidebar-list">
-                        <a class="sidebar-link sidebar-title link-nav {{ request()->routeIs('categories.*') ? 'active' : '' }}"
-                            href="{{ route('categories.index') }}">
+                    {{-- 4. Kataloglar (Faqat Superadmin ko'radi) --}}
+                    @if($isSuperAdmin)
+                    <li class="sidebar-list {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('categories.index') }}">
                             <i data-feather="folder"></i><span>Категории</span>
                         </a>
                     </li>
-                    @endcan
 
-                    @can('viewAny', \App\Models\Brand::class)
-                    <li class="sidebar-list">
-                        <a class="sidebar-link sidebar-title link-nav {{ request()->routeIs('brands.*') ? 'active' : '' }}"
-                            href="{{ route('brands.index') }}">
+                    <li class="sidebar-list {{ request()->routeIs('brands.*') ? 'active' : '' }}">
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('brands.index') }}">
                             <i data-feather="tag"></i><span>Бренды</span>
                         </a>
                     </li>
-                    @endcan
 
-                    @can('viewAny', \App\Models\City::class)
-                    <li class="sidebar-list">
-                        <a class="sidebar-link sidebar-title link-nav {{ request()->routeIs('cities.*') ? 'active' : '' }}"
-                            href="{{ route('cities.index') }}">
+                    <li class="sidebar-list {{ request()->routeIs('cities.*') ? 'active' : '' }}">
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('cities.index') }}">
                             <i data-feather="map-pin"></i><span>Города</span>
                         </a>
                     </li>
-                    @endcan
+                    @endif
 
+                    <li class="sidebar-list {{ request()->routeIs('cities.*') ? 'active' : '' }}">
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('cities.index') }}">
+                            <i data-feather="book-open"></i><span>Меню</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
             <div class="right-arrow" id="right-arrow"><i data-feather="arrow-right"></i></div>

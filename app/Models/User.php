@@ -23,9 +23,14 @@ class User extends Authenticatable
         'password',
     ];
 
-    public function restaurant()
+    public function restaurants()
     {
-        return $this->hasOne(Restaurant::class);
+        return $this->hasMany(Restaurant::class, 'user_id');
+    }
+
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
     }
 
     public function brands()

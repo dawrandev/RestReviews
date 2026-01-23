@@ -4,22 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OperatingHour extends Model
+class RestaurantImage extends Model
 {
     protected $fillable = [
         'restaurant_id',
-        'day_of_week',
-        'opening_time',
-        'closing_time',
-        'is_closed'
+        'image_path',
+        'is_cover'
     ];
 
     public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);
     }
-
-    protected $casts = [
-        'is_closed' => 'boolean',
-    ];
 }

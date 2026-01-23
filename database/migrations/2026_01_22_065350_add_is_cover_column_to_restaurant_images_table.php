@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cities', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('restaurant_images', function (Blueprint $table) {
+            $table->boolean('is_cover')->default(false)->after('image_path');
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cities');
+        Schema::table('restaurant_images', function (Blueprint $table) {
+            $table->dropColumn('is_cover');
+        });
     }
 };

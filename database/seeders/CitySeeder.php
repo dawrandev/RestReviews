@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\City;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\City;
+use App\Models\Language;
 
 class CitySeeder extends Seeder
 {
@@ -13,6 +13,24 @@ class CitySeeder extends Seeder
      */
     public function run(): void
     {
-        City::firstOrCreate(['name' => 'Toshkent']);
+        $nukus = City::create();
+
+        $languages = Language::all();
+
+        $translations = [
+            'uz' => 'Nukus',
+            'ru' => 'Нукус',
+            'en' => 'Nukus',
+            'kk' => 'Nókis',
+        ];
+
+        foreach ($languages as $language) {
+            if (isset($translations[$language->code])) {
+                $nukus->translations()->create([
+                    'code' => $language->code,
+                    'name' => $translations[$language->code],
+                ]);
+            }
+        }
     }
 }

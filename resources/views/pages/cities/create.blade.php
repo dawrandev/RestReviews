@@ -9,11 +9,25 @@
                 @csrf
                 <div class="modal-body">
                     <div class="form-group mb-3">
-                        <label for="name">Название <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
-                        @error('name')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <label class="fw-bold">Переводы <span class="text-danger">*</span></label>
+                        @foreach(getLanguages() as $language)
+                        <div class="mb-2">
+                            <label for="translation_{{ $language->code }}" class="form-label">
+                                {{ $language->name }} ({{ strtoupper($language->code) }})
+                            </label>
+                            <input type="text"
+                                class="form-control @error('translations.' . $language->code) is-invalid @enderror"
+                                id="translation_{{ $language->code }}"
+                                name="translations[{{ $language->code }}]"
+                                value="{{ old('translations.' . $language->code) }}"
+                                placeholder="Название на {{ $language->name }}"
+                                required>
+                            @error('translations.' . $language->code)
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        @endforeach
+                        <small class="form-text text-muted">Укажите название города на всех языках</small>
                     </div>
                 </div>
                 <div class="modal-footer">

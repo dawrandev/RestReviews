@@ -10,10 +10,12 @@ class CityRepository
 {
     public function paginate(int $perPage = 15, ?string $search = null): LengthAwarePaginator
     {
-        $query = City::withCount(['restaurants']);
+        $query = City::with(['translations'])->withCount(['restaurants']);
 
         if ($search) {
-            $query->where('name', 'like', "%{$search}%");
+            $query->whereHas('translations', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
         }
 
         return $query->latest()->paginate($perPage);
@@ -21,32 +23,54 @@ class CityRepository
 
     public function findById(int $id): ?City
     {
-        return City::with(['restaurants'])->find($id);
+        return City::with(['translations', 'restaurants'])->find($id);
     }
 
     public function create(array $data): City
     {
         return DB::transaction(function () use ($data) {
-            return City::create([
-                'name' => $data['name'],
-            ]);
+            $city = City::create();
+
+            if (isset($data['translations'])) {
+                foreach ($data['translations'] as $langCode => $name) {
+                    if (!empty($name)) {
+                        $city->translations()->create([
+                            'code' => $langCode,
+                            'name' => $name,
+                        ]);
+                    }
+                }
+            }
+
+            return $city->load('translations');
         });
     }
 
     public function update(City $city, array $data): City
     {
         return DB::transaction(function () use ($city, $data) {
-            $city->update([
-                'name' => $data['name'],
-            ]);
 
-            return $city->fresh();
+            if (isset($data['translations'])) {
+                $city->translations()->delete();
+
+                foreach ($data['translations'] as $langCode => $name) {
+                    if (!empty($name)) {
+                        $city->translations()->create([
+                            'code' => $langCode,
+                            'name' => $name,
+                        ]);
+                    }
+                }
+            }
+
+            return $city->fresh('translations');
         });
     }
 
     public function delete(City $city): bool
     {
         return DB::transaction(function () use ($city) {
+            $city->translations()->delete();
             return $city->delete();
         });
     }

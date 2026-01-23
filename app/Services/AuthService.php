@@ -35,7 +35,7 @@ class AuthService
         }
 
         if ($user->hasRole('admin')) {
-            if (!$user->restaurant) {
+            if ($user->restaurants->isEmpty()) {
                 return route('restaurants.index', ['create' => 1]);
             }
 

@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('operating_hours', function (Blueprint $table) {
+        Schema::create('restaurant_menu_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
-            $table->tinyInteger('day_of_week');
-            $table->time('opening_time')->nullable();
-            $table->time('closing_time')->nullable();
-            $table->boolean('is_closed')->default(false);
+            $table->foreignId('menu_item_id')->constrained()->onDelete('cascade');
+            $table->decimal('price', 8, 2);
+            $table->boolean('is_available')->default(true);
             $table->timestamps();
-
-            $table->unique(['restaurant_id', 'day_of_week']);
         });
     }
 
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('operating_hours');
+        Schema::dropIfExists('restaurant_menu_items');
     }
 };

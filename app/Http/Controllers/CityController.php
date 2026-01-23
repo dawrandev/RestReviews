@@ -17,8 +17,7 @@ class CityController extends Controller
 
     public function index(Request $request)
     {
-        $search = $request->get('search');
-        $cities = $this->cityService->getCities($search);
+        $cities = $this->cityService->getCities($request->get('search'));
 
         return view('pages.cities.index', compact('cities'));
     }
@@ -31,12 +30,13 @@ class CityController extends Controller
     public function store(StoreCityRequest $request)
     {
         try {
-            $data = $request->validated();
-            $this->cityService->createCity($data);
+            $this->cityService->createCity($request->validated());
 
-            return redirect()->route('cities.index')->with('success', 'Город успешно создан');
+            return redirect()->route('cities.index')
+                ->with('success', 'Город успешно создан');
         } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Ошибка при создании города: ' . $e->getMessage());
+            return back()->withInput()
+                ->with('error', 'Ошибка при создании города: ' . $e->getMessage());
         }
     }
 
@@ -44,17 +44,21 @@ class CityController extends Controller
     {
         $city = $this->cityService->findCity($city->id);
 
+        $translations = [];
+        foreach ($city->translations as $translation) {
+            $translations[$translation->code] = $translation->name;
+        }
+
         return response()->json([
             'id' => $city->id,
-            'name' => $city->name,
+            'translations' => $translations,
         ]);
     }
 
     public function update(UpdateCityRequest $request, City $city)
     {
         try {
-            $data = $request->validated();
-            $this->cityService->updateCity($city, $data);
+            $this->cityService->updateCity($city, $request->validated());
 
             return redirect()->route('cities.index')
                 ->with('success', 'Город успешно обновлен');

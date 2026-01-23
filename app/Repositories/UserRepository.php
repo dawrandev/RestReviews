@@ -22,7 +22,7 @@ class UserRepository
             });
         });
 
-        return $query->with('restaurant')->paginate(10);
+        return $query->with('restaurants')->paginate(10);
     }
 
     public function create(array $data)

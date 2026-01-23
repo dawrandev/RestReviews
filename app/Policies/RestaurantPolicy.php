@@ -10,14 +10,12 @@ class RestaurantPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can(RestaurantPermissions::VIEW_ANY);
+        return $user->hasRole('superadmin') || $user->hasRole('admin');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('admin') &&
-            $user->can(RestaurantPermissions::CREATE) &&
-            !$user->restaurant;
+        return $user->can(RestaurantPermissions::CREATE);
     }
 
     public function update(User $user, Restaurant $restaurant): bool
@@ -33,6 +31,7 @@ class RestaurantPolicy
 
     public function delete(User $user, Restaurant $restaurant): bool
     {
-        return false;
+        return $user->can(RestaurantPermissions::DELETE) &&
+            $user->id === $restaurant->user_id;
     }
 }

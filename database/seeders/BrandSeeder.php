@@ -13,7 +13,7 @@ class BrandSeeder extends Seeder
      */
     public function run(): void
     {
-        Brand::firstOrCreate(['name' => 'Osh Markazi Tarmog\'i'], ['logo' => 'osh.png'], ['description' => 'Osh Markazi Tarmog\'i']);
-        Brand::firstOrCreate(['name' => 'City Cafe Chain'], ['logo' => 'city.png'], ['description' => 'City Cafe Chain']);
+        // Brand::firstOrCreate(['name' => 'Osh Markazi Tarmog\'i'], ['logo' => 'osh.png'], ['description' => 'Osh Markazi Tarmog\'i']);
+        // Brand::firstOrCreate(['name' => 'City Cafe Chain'], ['logo' => 'city.png'], ['description' => 'City Cafe Chain']);
     }
 }

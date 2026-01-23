@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cities', function (Blueprint $table) {
+        Schema::create('menu_sections', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('brand_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
     }
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cities');
+        Schema::dropIfExists('menu_sections');
     }
 };

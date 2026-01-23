@@ -12,22 +12,11 @@
 
                 <div class="modal-body">
                     <div class="row">
-                        {{-- Brand (disabled for admin) --}}
+                        {{-- Brand (always read-only in edit mode) --}}
                         <div class="col-md-4 mb-3">
                             <label for="edit_brand_id" class="form-label">Бренд <span class="text-danger">*</span></label>
-                            @if(auth()->user()->hasRole('admin'))
-                            <input type="hidden" name="brand_id" value="{{ auth()->user()->brand_id }}">
-                            <input type="text" class="form-control"
-                                value="{{ auth()->user()->brand->name ?? 'N/A' }}"
-                                disabled>
-                            @else
-                            <select class="form-select" id="edit_brand_id" name="brand_id" required>
-                                <option value="">Выберите бренд</option>
-                                @foreach(getBrands() as $brand)
-                                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                @endforeach
-                            </select>
-                            @endif
+                            <input type="text" class="form-control" id="edit_brand_name_display" value="" readonly style="background-color: #e9ecef;">
+                            <input type="hidden" id="edit_brand_id" name="brand_id">
                         </div>
 
                         {{-- City --}}
@@ -123,6 +112,65 @@
                     <div class="mb-3">
                         <label for="edit_description" class="form-label">Описание</label>
                         <textarea class="form-control" id="edit_description" name="description" rows="4"></textarea>
+                    </div>
+
+                    {{-- Operating Hours --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Режим работы <span class="text-danger">*</span></label>
+                        <div class="card">
+                            <div class="card-body">
+                                @php
+                                $daysOfWeek = [
+                                0 => 'Воскресенье',
+                                1 => 'Понедельник',
+                                2 => 'Вторник',
+                                3 => 'Среда',
+                                4 => 'Четверг',
+                                5 => 'Пятница',
+                                6 => 'Суббота',
+                                ];
+                                @endphp
+
+                                @foreach($daysOfWeek as $dayNumber => $dayName)
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-md-3">
+                                        <label class="form-label mb-0">{{ $dayName }}</label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="time"
+                                            class="form-control form-control-sm opening-time"
+                                            name="operating_hours[{{ $dayNumber }}][opening_time]"
+                                            id="edit_opening_time_{{ $dayNumber }}"
+                                            data-day="{{ $dayNumber }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="time"
+                                            class="form-control form-control-sm closing-time"
+                                            name="operating_hours[{{ $dayNumber }}][closing_time]"
+                                            id="edit_closing_time_{{ $dayNumber }}"
+                                            data-day="{{ $dayNumber }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input is-closed-check"
+                                                type="checkbox"
+                                                name="operating_hours[{{ $dayNumber }}][is_closed]"
+                                                value="1"
+                                                id="edit_is_closed_{{ $dayNumber }}"
+                                                data-day="{{ $dayNumber }}">
+                                            <label class="form-check-label" for="edit_is_closed_{{ $dayNumber }}">
+                                                Выходной
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+
+                                <div class="alert alert-info mt-3">
+                                    <i class="fa fa-info-circle"></i> Установите время работы для каждого дня. Отметьте "Выходной" для нерабочих дней.
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

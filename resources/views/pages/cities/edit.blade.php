@@ -11,9 +11,21 @@
                 <input type="hidden" id="edit_city_id" name="city_id">
                 <div class="modal-body">
                     <div class="form-group mb-3">
-                        <label for="edit_name">Название <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="edit_name" name="name" required>
-                        <div class="invalid-feedback" id="error_name"></div>
+                        <label class="fw-bold">Переводы <span class="text-danger">*</span></label>
+                        @foreach(getLanguages() as $language)
+                        <div class="mb-2">
+                            <label for="edit_translation_{{ $language->code }}" class="form-label">
+                                {{ $language->name }} ({{ strtoupper($language->code) }})
+                            </label>
+                            <input type="text"
+                                class="form-control"
+                                id="edit_translation_{{ $language->code }}"
+                                name="translations[{{ $language->code }}]"
+                                placeholder="Название на {{ $language->name }}"
+                                required>
+                        </div>
+                        @endforeach
+                        <small class="form-text text-muted">Укажите название города на всех языках</small>
                     </div>
                 </div>
                 <div class="modal-footer">

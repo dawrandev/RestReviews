@@ -74,7 +74,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;">№</th>
-                                        <th>Название</th>
+                                        <th>Переводы</th>
                                         <th style="width: 100px;">Рестораны</th>
                                         <th style="width: 120px">Действия</th>
                                     </tr>
@@ -84,7 +84,15 @@
                                     @forelse ($cities as $city)
                                     <tr>
                                         <td>{{ $counter++ }}</td>
-                                        <td><strong>{{ $city->name }}</strong></td>
+                                        <td>
+                                            @if($city->translations->count() > 0)
+                                            @foreach($city->translations as $translation)
+                                            <span class="badge badge-info me-1">{{ strtoupper($translation->code) }}: {{ $translation->name }}</span>
+                                            @endforeach
+                                            @else
+                                            <span class="text-muted">Нет переводов</span>
+                                            @endif
+                                        </td>
                                         <td class="text-center">
                                             <span class="badge badge-info">{{ $city->restaurants_count }}</span>
                                         </td>
@@ -104,7 +112,7 @@
                                                         class="btn btn-outline-danger btn-sm btn-delete-confirm"
                                                         data-form-id="delete-city-{{ $city->id }}"
                                                         data-title="Удалить город?"
-                                                        data-text="Вы уверены, что хотите удалить {{ $city->name }}?"
+                                                        data-text="Вы уверены, что хотите удалить этот город?"
                                                         data-confirm-text="Да, удалить"
                                                         data-cancel-text="Отмена">
                                                         <i class="fa fa-trash"></i>
@@ -134,7 +142,6 @@
 @include('pages.cities.edit')
 
 @endsection
-
 @push('scripts')
 <script>
     $(document).ready(function() {
@@ -146,12 +153,22 @@
             $('#editCityForm').trigger("reset");
             $('.is-invalid').removeClass('is-invalid');
 
+            // Clear all translation fields first
+            $('[id^="edit_translation_"]').val('');
+
             $.ajax({
                 url: url,
                 method: 'GET',
                 success: function(data) {
                     $('#edit_city_id').val(data.id);
-                    $('#edit_name').val(data.name);
+                    // edit_name fieldini olib tashladik
+
+                    // Load translations
+                    if (data.translations) {
+                        $.each(data.translations, function(langCode, name) {
+                            $('#edit_translation_' + langCode).val(name);
+                        });
+                    }
 
                     let updateUrl = "{{ route('cities.update', ':id') }}".replace(':id', data.id);
                     $('#editCityForm').attr('action', updateUrl);

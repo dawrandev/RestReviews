@@ -14,16 +14,17 @@ class StoreCityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:cities,name'],
+            'translations' => ['required', 'array', 'min:1'],
+            'translations.*' => ['required', 'string', 'max:255'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Поле название обязательно для заполнения',
-            'name.unique' => 'Город с таким названием уже существует',
-            'name.max' => 'Название не должно превышать 255 символов',
+            'translations.required' => 'Необходимо указать хотя бы один перевод',
+            'translations.*.required' => 'Название перевода обязательно для заполнения',
+            'translations.*.max' => 'Название перевода не должно превышать 255 символов',
         ];
     }
 }

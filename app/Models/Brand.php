@@ -21,4 +21,9 @@ class Brand extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function menuSections()
+    {
+        return $this->hasMany(MenuSection::class);
+    }
 }

@@ -74,8 +74,8 @@
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->login }}</td>
                                         <td>
-                                            @if($user->restaurant)
-                                            <span class="badge badge-info">{{ $user->restaurant->name }}</span>
+                                            @if($user->restaurants->isNotEmpty())
+                                            <span class="badge badge-info">{{ $user->restaurants->first()->branch_name }}</span>
                                             @else
                                             <span class="text-muted">Не назначен</span>
                                             @endif

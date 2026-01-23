@@ -26,6 +26,7 @@ Route::prefix('/restaurants')->middleware(['auth'])->name('restaurants.')->group
     Route::get('/{restaurant}/edit', [App\Http\Controllers\RestaurantController::class, 'edit'])->name('edit');
     Route::put('/{restaurant}/update', [App\Http\Controllers\RestaurantController::class, 'update'])->name('update');
     Route::delete('/{restaurant}/delete', [App\Http\Controllers\RestaurantController::class, 'destroy'])->name('destroy');
+    Route::delete('/images/{image}', [App\Http\Controllers\RestaurantController::class, 'deleteImage'])->name('images.delete');
 });
 
 Route::prefix('/users')->middleware(['auth', 'role:superadmin'])->name('users.')->group(function () {
