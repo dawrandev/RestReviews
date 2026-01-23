@@ -191,55 +191,6 @@
 
 @endsection
 
-@push('styles')
-<style>
-    /* Custom marker for Leaflet map */
-    .custom-marker {
-        background: transparent;
-        border: none;
-    }
-
-    /* Gradient header for show modal */
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    /* Card hover effects */
-    .card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    /* Image preview styling */
-    #edit_images_preview .card img {
-        transition: transform 0.2s ease-in-out;
-    }
-
-    #edit_images_preview .card:hover img {
-        transform: scale(1.05);
-    }
-
-    /* Badge styling */
-    .badge {
-        font-weight: 500;
-        padding: 0.35em 0.65em;
-    }
-
-    /* Delete button on images */
-    .delete-image-btn {
-        opacity: 0.8;
-        transition: opacity 0.2s ease-in-out;
-    }
-
-    .delete-image-btn:hover {
-        opacity: 1;
-    }
-</style>
-@endpush
 
 @push('scripts')
 <script>
@@ -594,33 +545,31 @@
                 // Set basic info
                 $('#show-id').val(data.id);
                 $('#show-name').text(data.branch_name);
-                $('#show-brand-badge').html('<span class="badge bg-light text-dark"><i class="fa fa-store me-1"></i>' + data.brand + '</span>');
-                $('#show-brand').text(data.brand);
-                $('#show-city').text(data.city);
+                $('#show-brand').text(data.brand || '-');
+                $('#show-city').text(data.city || '-');
                 $('#show-description').text(data.description || 'Нет описания');
                 $('#show-phone').text(data.phone || 'Не указан');
                 $('#show-address').text(data.address || 'Не указан');
                 $('#show-latitude').text(data.latitude || 'N/A');
                 $('#show-longitude').text(data.longitude || 'N/A');
-                $('#show-created-at').text(data.created_at);
+                $('#show-created-at').text(data.created_at || '-');
 
                 // Status badge
-                $('#show-status').removeClass('badge-success badge-danger bg-success bg-danger');
                 if (data.is_active) {
-                    $('#show-status').addClass('badge bg-success').html('<i class="fa fa-check-circle me-1"></i>Активен');
+                    $('#show-status').attr('class', 'badge badge-success').text('Активен');
                 } else {
-                    $('#show-status').addClass('badge bg-danger').html('<i class="fa fa-times-circle me-1"></i>Неактивен');
+                    $('#show-status').attr('class', 'badge badge-danger').text('Неактивен');
                 }
 
                 // Categories
                 if (data.category_names && data.category_names.length > 0) {
                     let categoriesHtml = '';
                     data.category_names.forEach(function(catName) {
-                        categoriesHtml += '<span class="badge bg-warning text-dark me-1 mb-1" style="font-size: 0.9rem;">' + catName + '</span>';
+                        categoriesHtml += '<span class="badge badge-warning me-1 mb-1">' + catName + '</span>';
                     });
                     $('#show-categories').html(categoriesHtml);
                 } else {
-                    $('#show-categories').html('<span class="text-muted"><i class="fa fa-info-circle me-1"></i>Нет категорий</span>');
+                    $('#show-categories').html('<span class="text-muted">Нет категорий</span>');
                 }
 
                 // QR Code
@@ -636,18 +585,16 @@
                 if (data.images && data.images.length > 0) {
                     let imagesHtml = '';
                     data.images.forEach(function(img) {
-                        imagesHtml += '<div class="mb-3 position-relative">';
-                        imagesHtml += '<img src="' + img.url + '" class="img-fluid rounded shadow-sm" alt="Image" style="width: 100%; height: auto;">';
+                        imagesHtml += '<div class="mb-2">';
+                        imagesHtml += '<img src="' + img.url + '" class="img-fluid rounded" alt="Image">';
                         if (img.is_cover) {
-                            imagesHtml += '<span class="position-absolute top-0 end-0 m-2">';
-                            imagesHtml += '<span class="badge bg-success"><i class="fa fa-star me-1"></i>Обложка</span>';
-                            imagesHtml += '</span>';
+                            imagesHtml += '<span class="badge badge-success mt-1">Обложка</span>';
                         }
                         imagesHtml += '</div>';
                     });
                     $('#show-images').html(imagesHtml);
                 } else {
-                    $('#show-images').html('<div class="text-center text-muted py-4"><i class="fa fa-image fa-3x mb-2 d-block"></i><p>Нет изображений</p></div>');
+                    $('#show-images').html('<p class="text-muted">Нет изображений</p>');
                 }
 
                 // Update edit button
@@ -671,17 +618,7 @@
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                 attribution: '© OpenStreetMap'
                             }).addTo(showMap);
-
-                            // Custom marker icon
-                            let customIcon = L.divIcon({
-                                html: '<i class="fa fa-map-marker-alt fa-3x text-danger"></i>',
-                                iconSize: [30, 30],
-                                className: 'custom-marker'
-                            });
-
-                            L.marker([lat, lng], {
-                                    icon: customIcon
-                                }).addTo(showMap)
+                            L.marker([lat, lng]).addTo(showMap)
                                 .bindPopup('<strong>' + data.branch_name + '</strong><br>' + data.address);
                         } else {
                             showMap.setView([lat, lng], 15);
@@ -690,16 +627,7 @@
                                     showMap.removeLayer(layer);
                                 }
                             });
-
-                            let customIcon = L.divIcon({
-                                html: '<i class="fa fa-map-marker-alt fa-3x text-danger"></i>',
-                                iconSize: [30, 30],
-                                className: 'custom-marker'
-                            });
-
-                            L.marker([lat, lng], {
-                                    icon: customIcon
-                                }).addTo(showMap)
+                            L.marker([lat, lng]).addTo(showMap)
                                 .bindPopup('<strong>' + data.branch_name + '</strong><br>' + data.address);
                             showMap.invalidateSize();
                         }
@@ -763,28 +691,22 @@
                     }
                 }, 100);
 
-                // Display existing images with better design
+                // Display existing images
                 if (data.images && data.images.length > 0) {
                     let imagesHtml = '';
-                    data.images.forEach(function(img, index) {
-                        imagesHtml += '<div class="col-4 col-md-3 mb-3 position-relative" id="image-' + img.id + '">';
-                        imagesHtml += '<div class="card border shadow-sm h-100">';
-                        imagesHtml += '<img src="' + img.url + '" class="card-img-top" alt="Image" style="height: 150px; object-fit: cover;">';
-                        imagesHtml += '<div class="card-body p-2 text-center">';
+                    data.images.forEach(function(img) {
+                        imagesHtml += '<div class="col-4 col-md-3 mb-2 position-relative" id="image-' + img.id + '">';
+                        imagesHtml += '<img src="' + img.url + '" class="img-thumbnail" alt="Image">';
                         if (img.is_cover) {
-                            imagesHtml += '<span class="badge bg-success w-100"><i class="fa fa-star me-1"></i>Обложка</span>';
-                        } else {
-                            imagesHtml += '<span class="badge bg-secondary w-100">Фото ' + (index + 1) + '</span>';
+                            imagesHtml += '<span class="badge badge-success d-block mt-1">Обложка</span>';
                         }
-                        imagesHtml += '</div>';
-                        imagesHtml += '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 delete-image-btn" data-image-id="' + img.id + '" title="Удалить">';
+                        imagesHtml += '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 delete-image-btn" data-image-id="' + img.id + '">';
                         imagesHtml += '<i class="fa fa-times"></i></button>';
-                        imagesHtml += '</div>';
                         imagesHtml += '</div>';
                     });
                     $('#edit_images_preview').html(imagesHtml);
                 } else {
-                    $('#edit_images_preview').html('<div class="col-12"><p class="text-muted text-center py-3">Нет загруженных фотографий</p></div>');
+                    $('#edit_images_preview').html('<div class="col-12"><p class="text-muted text-center">Нет загруженных фотографий</p></div>');
                 }
 
                 let updateUrl = "{{ route('restaurants.update', ':id') }}".replace(':id', data.id);

@@ -75,9 +75,7 @@
 
                     {{-- Categories with Select2 --}}
                     <div class="mb-3">
-                        <label for="edit_categories" class="form-label fw-bold">
-                            <i class="fa fa-tags me-2 text-warning"></i>Категории
-                        </label>
+                        <label for="edit_categories" class="form-label">Категории</label>
                         <select class="form-control select2-edit-categories" id="edit_categories" name="categories[]" multiple="multiple">
                             @foreach(getCategories() as $category)
                             <option value="{{ $category->id }}">
@@ -85,9 +83,7 @@
                             </option>
                             @endforeach
                         </select>
-                        <small class="text-muted d-block mt-1">
-                            <i class="fa fa-info-circle me-1"></i>Выберите одну или несколько категорий для ресторана
-                        </small>
+                        <small class="text-muted">Выберите одну или несколько категорий</small>
                     </div>
 
                     {{-- Map --}}
@@ -100,29 +96,19 @@
                     </div>
 
                     {{-- Existing Images --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">
-                            <i class="fa fa-images me-2 text-primary"></i>Текущие фотографии
-                        </label>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row" id="edit_images_preview">
-                                    <div class="col-12">
-                                        <p class="text-muted text-center py-3">Загрузка фотографий...</p>
-                                    </div>
-                                </div>
+                    <div class="mb-3">
+                        <label class="form-label">Текущие фотографии</label>
+                        <div class="row" id="edit_images_preview">
+                            <div class="col-12">
+                                <p class="text-muted text-center">Загрузка...</p>
                             </div>
                         </div>
-                        <small class="text-muted d-block mt-2">
-                            <i class="fa fa-info-circle me-1"></i>Нажмите на кнопку <i class="fa fa-times"></i> чтобы удалить фотографию
-                        </small>
+                        <small class="text-muted">Нажмите на кнопку <i class="fa fa-times"></i> чтобы удалить фотографию</small>
                     </div>
 
                     {{-- Dropzone for New Images --}}
                     <div class="mb-3">
-                        <label class="form-label fw-bold">
-                            <i class="fa fa-cloud-upload-alt me-2 text-success"></i>Добавить новые фотографии
-                        </label>
+                        <label class="form-label">Добавить новые фотографии</label>
                         <div class="dropzone" id="editRestaurantImagesDropzone">
                             <div class="dz-message needsclick">
                                 <i class="icon-cloud-up"></i>
@@ -130,9 +116,7 @@
                                 <span class="note needsclick">Максимум 5 новых фотографий</span>
                             </div>
                         </div>
-                        <small class="text-muted">
-                            <i class="fa fa-info-circle me-1"></i>Форматы: JPG, PNG. Максимальный размер: 5MB на файл
-                        </small>
+                        <small class="text-muted">Форматы: JPG, PNG. Максимальный размер: 5MB на файл</small>
                     </div>
 
                     {{-- Description --}}
