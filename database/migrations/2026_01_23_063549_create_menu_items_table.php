@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('menu_section_id')->constrained()->onDelete('cascade');
             $table->string('image_path')->nullable();
-            $table->decimal('base_price', 8, 2);
+            $table->decimal('base_price', 8, 2)->nullable();
+            $table->unsignedInteger('weight')->nullable()->comment('Weight in grams');
             $table->timestamps();
         });
     }

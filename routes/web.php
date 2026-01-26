@@ -76,3 +76,8 @@ Route::middleware(['auth'])->name('restaurant-menu-items.')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::post('/switch-language', [App\Http\Controllers\LanguageController::class, 'switch'])->name('language.switch');
 });
+
+Route::middleware(['auth'])->name('reviews.')->group(function () {
+    Route::get('/reviews', [App\Http\Controllers\ReviewController::class, 'index'])->name('index');
+    Route::delete('/reviews/{review}', [App\Http\Controllers\ReviewController::class, 'destroy'])->name('destroy');
+});

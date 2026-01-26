@@ -83,4 +83,46 @@ class ReviewService
         // You can add additional logic here (e.g., check if they've visited)
         return true;
     }
+
+    /**
+     * Get reviews for admin's restaurants
+     */
+    public function getReviewsForAdmin(\App\Models\User $user, int $perPage = 15, ?int $rating = null): LengthAwarePaginator
+    {
+        $restaurantIds = $user->restaurants->pluck('id')->toArray();
+        return $this->reviewRepository->getPaginatedByRestaurantIds($restaurantIds, $perPage, $rating);
+    }
+
+    /**
+     * Get all reviews (for superadmin)
+     */
+    public function getAllReviews(int $perPage = 15, ?int $rating = null): LengthAwarePaginator
+    {
+        return $this->reviewRepository->getAllPaginated($perPage, $rating);
+    }
+
+    /**
+     * Get review statistics for admin's restaurants
+     */
+    public function getStatisticsForAdmin(\App\Models\User $user): array
+    {
+        $restaurantIds = $user->restaurants->pluck('id')->toArray();
+        return $this->reviewRepository->getStatisticsByRestaurantIds($restaurantIds);
+    }
+
+    /**
+     * Get all statistics (for superadmin)
+     */
+    public function getAllStatistics(): array
+    {
+        return $this->reviewRepository->getAllStatistics();
+    }
+
+    /**
+     * Find review by ID
+     */
+    public function findById(int $id): ?Review
+    {
+        return $this->reviewRepository->findById($id);
+    }
 }

@@ -12,6 +12,8 @@ class RestaurantRepository
     public function getAll(int $perPage = 10): LengthAwarePaginator
     {
         return Restaurant::with(['brand', 'city.translations', 'images', 'categories.translations'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->latest()
             ->paginate($perPage);
     }
@@ -19,6 +21,8 @@ class RestaurantRepository
     public function getByUserId(int $userId, int $perPage = 10): LengthAwarePaginator
     {
         return Restaurant::with(['brand', 'city.translations', 'images', 'categories.translations'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->where('user_id', $userId)
             ->latest()
             ->paginate($perPage);
@@ -27,6 +31,8 @@ class RestaurantRepository
     public function findById(int $id): ?Restaurant
     {
         return Restaurant::with(['brand', 'city.translations', 'images', 'categories.translations', 'operatingHours'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->find($id);
     }
 

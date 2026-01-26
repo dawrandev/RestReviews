@@ -107,6 +107,11 @@
                                             <p class="text-muted small mb-2">
                                                 <i class="fa fa-folder text-primary me-1"></i> {{ $rmi->menuItem->menuSection->name }}
                                             </p>
+                                            @if($rmi->menuItem->weight)
+                                            <p class="text-muted small mb-2">
+                                                <i class="fa fa-weight text-info me-1"></i> {{ $rmi->menuItem->weight }} г
+                                            </p>
+                                            @endif
                                             @if($rmi->menuItem->description)
                                             <p class="text-muted small mb-2">{{ Str::limit($rmi->menuItem->description, 60) }}</p>
                                             @endif

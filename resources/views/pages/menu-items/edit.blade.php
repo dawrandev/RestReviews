@@ -62,6 +62,12 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="edit_weight" class="form-label">Вес (граммы)</label>
+                                <input type="number" class="form-control" id="edit_weight" name="weight" min="0" step="1">
+                                <small class="text-muted">Только для блюд и закусок, для напитков оставьте пустым</small>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="edit_image" class="form-label">Изображение</label>
                                 <div class="mb-2">
                                     <img id="edit_current_image" src="" alt="Current Image" class="img-thumbnail" style="max-height: 100px; display: none;">

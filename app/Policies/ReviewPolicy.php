@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Models\Review;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use App\Permissions\ReviewPermissions;
 
 class ReviewPolicy
 {
@@ -13,7 +13,8 @@ class ReviewPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasRole(['superadmin', 'admin']) &&
+               $user->can(ReviewPermissions::VIEW_ANY);
     }
 
     /**
@@ -21,22 +22,20 @@ class ReviewPolicy
      */
     public function view(User $user, Review $review): bool
     {
-        return false;
-    }
+        if (!$user->can(ReviewPermissions::VIEW)) {
+            return false;
+        }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
-    {
-        return false;
-    }
+        // Superadmin can view all reviews
+        if ($user->hasRole('superadmin')) {
+            return true;
+        }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Review $review): bool
-    {
+        // Admin can only view reviews for their restaurants
+        if ($user->hasRole('admin')) {
+            return $user->restaurants->contains($review->restaurant_id);
+        }
+
         return false;
     }
 
@@ -45,22 +44,20 @@ class ReviewPolicy
      */
     public function delete(User $user, Review $review): bool
     {
-        return false;
-    }
+        if (!$user->can(ReviewPermissions::DELETE)) {
+            return false;
+        }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Review $review): bool
-    {
-        return false;
-    }
+        // Superadmin can delete any review
+        if ($user->hasRole('superadmin')) {
+            return true;
+        }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Review $review): bool
-    {
+        // Admin can only delete reviews for their restaurants
+        if ($user->hasRole('admin')) {
+            return $user->restaurants->contains($review->restaurant_id);
+        }
+
         return false;
     }
 }

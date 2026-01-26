@@ -108,4 +108,88 @@ class ReviewRepository
             5 => $distribution[5] ?? 0,
         ];
     }
+
+    /**
+     * Get paginated reviews for multiple restaurants (for admin)
+     */
+    public function getPaginatedByRestaurantIds(array $restaurantIds, int $perPage = 15, ?int $rating = null): LengthAwarePaginator
+    {
+        $query = Review::whereIn('restaurant_id', $restaurantIds)
+            ->with(['client:id,first_name,last_name,image_path', 'restaurant:id,branch_name']);
+
+        if ($rating) {
+            $query->where('rating', $rating);
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Get all reviews paginated (for superadmin)
+     */
+    public function getAllPaginated(int $perPage = 15, ?int $rating = null): LengthAwarePaginator
+    {
+        $query = Review::with(['client:id,first_name,last_name,image_path', 'restaurant:id,branch_name']);
+
+        if ($rating) {
+            $query->where('rating', $rating);
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Get review statistics for multiple restaurants
+     */
+    public function getStatisticsByRestaurantIds(array $restaurantIds): array
+    {
+        $stats = Review::whereIn('restaurant_id', $restaurantIds)
+            ->selectRaw('
+                COUNT(*) as total_reviews,
+                AVG(rating) as average_rating,
+                SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) as five_star,
+                SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) as four_star,
+                SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) as three_star,
+                SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_star,
+                SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star
+            ')
+            ->first();
+
+        return [
+            'total_reviews' => $stats->total_reviews ?? 0,
+            'average_rating' => round($stats->average_rating ?? 0, 1),
+            'five_star' => $stats->five_star ?? 0,
+            'four_star' => $stats->four_star ?? 0,
+            'three_star' => $stats->three_star ?? 0,
+            'two_star' => $stats->two_star ?? 0,
+            'one_star' => $stats->one_star ?? 0,
+        ];
+    }
+
+    /**
+     * Get all statistics (for superadmin)
+     */
+    public function getAllStatistics(): array
+    {
+        $stats = Review::selectRaw('
+                COUNT(*) as total_reviews,
+                AVG(rating) as average_rating,
+                SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) as five_star,
+                SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) as four_star,
+                SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) as three_star,
+                SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_star,
+                SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star
+            ')
+            ->first();
+
+        return [
+            'total_reviews' => $stats->total_reviews ?? 0,
+            'average_rating' => round($stats->average_rating ?? 0, 1),
+            'five_star' => $stats->five_star ?? 0,
+            'four_star' => $stats->four_star ?? 0,
+            'three_star' => $stats->three_star ?? 0,
+            'two_star' => $stats->two_star ?? 0,
+            'one_star' => $stats->one_star ?? 0,
+        ];
+    }
 }

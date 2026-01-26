@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Permissions\MenuSectionPermissions;
 use App\Permissions\MenuItemPermissions;
 use App\Permissions\RestaurantMenuItemPermissions;
+use App\Permissions\ReviewPermissions;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -25,6 +26,11 @@ class MenuPermissionsSeeder extends Seeder
 
         // Create RestaurantMenuItem permissions
         foreach (RestaurantMenuItemPermissions::all() as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // Create Review permissions
+        foreach (ReviewPermissions::all() as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
@@ -51,6 +57,10 @@ class MenuPermissionsSeeder extends Seeder
                 RestaurantMenuItemPermissions::CREATE,
                 RestaurantMenuItemPermissions::UPDATE,
                 RestaurantMenuItemPermissions::DELETE,
+
+                ReviewPermissions::VIEW_ANY,
+                ReviewPermissions::VIEW,
+                ReviewPermissions::DELETE,
             ]);
         }
 
@@ -62,6 +72,10 @@ class MenuPermissionsSeeder extends Seeder
                 MenuItemPermissions::VIEW,
                 RestaurantMenuItemPermissions::VIEW_ANY,
                 RestaurantMenuItemPermissions::VIEW,
+
+                ReviewPermissions::VIEW_ANY,
+                ReviewPermissions::VIEW,
+                ReviewPermissions::DELETE,
             ]);
         }
 

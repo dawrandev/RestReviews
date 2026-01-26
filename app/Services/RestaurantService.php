@@ -47,6 +47,9 @@ class RestaurantService
         // Generate QR Code after restaurant is created
         $this->generateRestaurantQrCode($restaurant);
 
+        // Add all brand menu items to this restaurant
+        $this->addBrandMenuItemsToRestaurant($restaurant);
+
         return $restaurant->fresh();
     }
 
@@ -115,5 +118,30 @@ class RestaurantService
 
         // Update restaurant with QR code path
         $restaurant->update(['qr_code' => $qrCodePath]);
+    }
+
+    protected function addBrandMenuItemsToRestaurant(Restaurant $restaurant): void
+    {
+        // Get all menu items for this brand
+        $menuItems = \App\Models\MenuItem::whereHas('menuSection', function ($query) use ($restaurant) {
+            $query->where('brand_id', $restaurant->brand_id);
+        })->get();
+
+        // Add each menu item to restaurant_menu_items
+        foreach ($menuItems as $menuItem) {
+            // Check if already exists
+            $exists = \App\Models\RestaurantMenuItem::where('restaurant_id', $restaurant->id)
+                ->where('menu_item_id', $menuItem->id)
+                ->exists();
+
+            if (!$exists) {
+                \App\Models\RestaurantMenuItem::create([
+                    'restaurant_id' => $restaurant->id,
+                    'menu_item_id' => $menuItem->id,
+                    'price' => $menuItem->base_price ?? 0,
+                    'is_available' => true,
+                ]);
+            }
+        }
     }
 }

@@ -15,8 +15,8 @@
                         <div class="me-3">
                             <select class="form-select form-select-sm language-switcher" id="menu-language-select" style="width: auto;">
                                 @php
-                                    $currentLang = \App\Helpers\LanguageHelper::getCurrentLang();
-                                    $allLanguages = \App\Models\Language::all();
+                                $currentLang = \App\Helpers\LanguageHelper::getCurrentLang();
+                                $allLanguages = \App\Models\Language::all();
                                 @endphp
                                 @foreach($allLanguages as $lang)
                                 <option value="{{ $lang->code }}" {{ $currentLang == $lang->code ? 'selected' : '' }}>
@@ -92,7 +92,7 @@
                                     </form>
                                 </div>
                             </div>
-
+                            {{$menuItems}}
                             <div class="row">
                                 @forelse($menuItems as $item)
                                 <div class="col-xl-3 col-md-4 col-sm-6 mb-4">
@@ -115,6 +115,11 @@
                                             <p class="text-muted small mb-2">
                                                 <i class="fa fa-folder text-primary me-1"></i> {{ $item->menuSection->name }}
                                             </p>
+                                            @if($item->weight)
+                                            <p class="text-muted small mb-2">
+                                                <i class="fa fa-weight text-info me-1"></i> {{ $item->weight }}
+                                            </p>
+                                            @endif
                                             @if($item->description)
                                             <p class="text-muted small mb-2">{{ Str::limit($item->description, 60) }}</p>
                                             @endif
@@ -238,6 +243,7 @@
                 $('#edit_item_id').val(data.id);
                 $('#edit_menu_section_id').val(data.menu_section_id).trigger('change');
                 $('#edit_base_price').val(data.base_price);
+                $('#edit_weight').val(data.weight);
 
                 // Fill translations
                 @foreach($languages as $lang)

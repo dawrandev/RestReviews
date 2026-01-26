@@ -46,6 +46,7 @@ class MenuItemController extends Controller
             'translations.*.description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'base_price' => 'nullable|numeric|min:0',
+            'weight' => 'nullable|integer|min:0',
         ]);
 
         try {
@@ -76,6 +77,7 @@ class MenuItemController extends Controller
             'menu_section_id' => $menuItem->menu_section_id,
             'translations' => $translations,
             'base_price' => $menuItem->base_price,
+            'weight' => $menuItem->weight,
             'image_url' => $menuItem->image_path ? asset('storage/' . $menuItem->image_path) : null,
         ]);
     }
@@ -91,6 +93,7 @@ class MenuItemController extends Controller
             'translations.*.description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'base_price' => 'nullable|numeric|min:0',
+            'weight' => 'nullable|integer|min:0',
         ]);
 
         try {

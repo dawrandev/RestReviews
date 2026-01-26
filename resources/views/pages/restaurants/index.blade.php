@@ -100,6 +100,16 @@
                                             </div>
                                             @endif
 
+                                            @if($restaurant->reviews_count > 0)
+                                            <div class="mb-2">
+                                                <small class="text-warning">
+                                                    <i class="fa fa-star"></i>
+                                                    <strong>{{ round($restaurant->reviews_avg_rating, 1) }}</strong>
+                                                    <span class="text-muted">({{ $restaurant->reviews_count }} {{ $restaurant->reviews_count == 1 ? 'отзыв' : 'отзывов' }})</span>
+                                                </small>
+                                            </div>
+                                            @endif
+
                                             @if($restaurant->categories->count() > 0)
                                             <div class="mb-2">
                                                 @foreach($restaurant->categories->take(2) as $category)

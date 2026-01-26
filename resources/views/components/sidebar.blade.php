@@ -98,6 +98,15 @@
                         </ul>
                     </li>
                     @endif
+
+                    {{-- 6. Reviews & Ratings (Superadmin va restorani bor Adminlar uchun) --}}
+                    @if($isSuperAdmin || ($user->hasRole('admin') && $hasRestaurant))
+                    <li class="sidebar-list {{ request()->routeIs('reviews.*') ? 'active' : '' }}">
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('reviews.index') }}">
+                            <i data-feather="star"></i><span>Отзывы и рейтинги</span>
+                        </a>
+                    </li>
+                    @endif
                 </ul>
             </div>
             <div class="right-arrow" id="right-arrow"><i data-feather="arrow-right"></i></div>

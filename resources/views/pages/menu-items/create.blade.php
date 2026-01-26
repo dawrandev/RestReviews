@@ -72,6 +72,15 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="weight" class="form-label">Вес (граммы)</label>
+                                <input type="number" class="form-control @error('weight') is-invalid @enderror" id="weight" name="weight" value="{{ old('weight') }}" min="0" step="1">
+                                @error('weight')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Только для блюд и закусок, для напитков оставьте пустым</small>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="image" class="form-label">Изображение</label>
                                 <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" accept="image/*">
                                 @error('image')

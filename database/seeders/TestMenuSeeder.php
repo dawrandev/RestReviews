@@ -12,6 +12,11 @@ class TestMenuSeeder extends Seeder
         $brand = \App\Models\Brand::where('name', 'like', '%Grand Lavash%')->first()
             ?? \App\Models\Brand::first();
 
+        if (!$brand) {
+            $this->command->warn('No brands found. Skipping TestMenuSeeder.');
+            return;
+        }
+
         $sections = [
             [
                 'ru' => 'Салаты',

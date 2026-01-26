@@ -60,6 +60,7 @@ class MenuItemRepository
                 'menu_section_id' => $data['menu_section_id'],
                 'image_path' => $data['image_path'] ?? null,
                 'base_price' => $data['base_price'] ?? null,
+                'weight' => $data['weight'] ?? null,
             ]);
 
             // Create translations
@@ -84,6 +85,7 @@ class MenuItemRepository
                 'menu_section_id' => $data['menu_section_id'] ?? $menuItem->menu_section_id,
                 'image_path' => $data['image_path'] ?? $menuItem->image_path,
                 'base_price' => $data['base_price'] ?? $menuItem->base_price,
+                'weight' => $data['weight'] ?? $menuItem->weight,
             ]);
 
             // Update translations
