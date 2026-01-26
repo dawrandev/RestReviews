@@ -34,6 +34,14 @@ class DiscoveryService
     }
 
     /**
+     * Get all restaurants for map display.
+     */
+    public function getRestaurantsForMap(array $filters = []): array
+    {
+        return $this->discoveryRepository->getRestaurantsForMap($filters);
+    }
+
+    /**
      * Get restaurant by ID with full details.
      */
     public function getRestaurantById(int $id, ?int $clientId = null): ?Restaurant

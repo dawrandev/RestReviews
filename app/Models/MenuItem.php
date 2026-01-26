@@ -10,6 +10,7 @@ class MenuItem extends Model
         'menu_section_id',
         'image_path',
         'base_price',
+        'weight_grams',
     ];
 
     public function menuSection()

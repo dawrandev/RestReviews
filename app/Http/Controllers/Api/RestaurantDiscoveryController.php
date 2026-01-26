@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RestaurantDetailResource;
 use App\Http\Resources\RestaurantListResource;
+use App\Http\Resources\MapRestaurantResource;
 use App\Services\DiscoveryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -33,6 +34,9 @@ class RestaurantDiscoveryController extends Controller
             new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'city_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'brand_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'menu_section_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'min_rating', in: 'query', required: false, schema: new OA\Schema(type: 'number', format: 'float')),
+            new OA\Parameter(name: 'max_rating', in: 'query', required: false, schema: new OA\Schema(type: 'number', format: 'float')),
             new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['rating', 'latest'])),
         ],
         responses: [
@@ -51,7 +55,7 @@ class RestaurantDiscoveryController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
-        $filters = $request->only(['category_id', 'city_id', 'brand_id', 'sort_by']);
+        $filters = $request->only(['category_id', 'city_id', 'brand_id', 'menu_section_id', 'min_rating', 'max_rating', 'sort_by']);
         $perPage = $request->input('per_page', 15);
 
         $restaurants = $this->discoveryService->getAllRestaurants($filters, $perPage);
@@ -184,6 +188,48 @@ class RestaurantDiscoveryController extends Controller
         return response()->json([
             'success' => true,
             'data' => new RestaurantDetailResource($restaurant),
+        ]);
+    }
+
+    #[OA\Get(
+        path: '/api/restaurants/map',
+        summary: 'Get all restaurants for map display',
+        tags: ['Discovery'],
+        parameters: [
+            new OA\Parameter(
+                name: 'Accept-Language',
+                in: 'header',
+                required: false,
+                description: 'Til kodi (uz, ru, kk, en). Default: kk',
+                schema: new OA\Schema(type: 'string', enum: ['uz', 'ru', 'kk', 'en'], default: 'kk')
+            ),
+            new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'city_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'min_rating', in: 'query', required: false, schema: new OA\Schema(type: 'number', format: 'float')),
+            new OA\Parameter(name: 'max_rating', in: 'query', required: false, schema: new OA\Schema(type: 'number', format: 'float')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Restaurants for map',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(type: 'object')),
+                    ]
+                )
+            )
+        ]
+    )]
+    public function map(Request $request): JsonResponse
+    {
+        $filters = $request->only(['category_id', 'city_id', 'min_rating', 'max_rating']);
+
+        $restaurants = $this->discoveryService->getRestaurantsForMap($filters);
+
+        return response()->json([
+            'success' => true,
+            'data' => MapRestaurantResource::collection(collect($restaurants)),
         ]);
     }
 }

@@ -43,6 +43,23 @@ class DiscoveryRepository
             $query->where('brand_id', $filters['brand_id']);
         }
 
+        // Filter by menu section
+        if (!empty($filters['menu_section_id'])) {
+            $query->whereHas('restaurantMenuItems.menuItem.menuSection', function ($q) use ($filters) {
+                $q->where('menu_sections.id', $filters['menu_section_id']);
+            });
+        }
+
+        // Filter by minimum rating
+        if (!empty($filters['min_rating'])) {
+            $query->having('reviews_avg_rating', '>=', $filters['min_rating']);
+        }
+
+        // Filter by maximum rating
+        if (!empty($filters['max_rating'])) {
+            $query->having('reviews_avg_rating', '<=', $filters['max_rating']);
+        }
+
         // Sort by rating if requested
         if (!empty($filters['sort_by']) && $filters['sort_by'] === 'rating') {
             $query->orderBy('reviews_avg_rating', 'desc');
@@ -93,6 +110,50 @@ class DiscoveryRepository
             ->orderBy('distance', 'asc');
 
         return $query->paginate($perPage);
+    }
+
+    /**
+     * Get all restaurants for map display.
+     */
+    public function getRestaurantsForMap(array $filters = []): array
+    {
+        $query = Restaurant::query()
+            ->where('is_active', true)
+            ->whereNotNull('location')
+            ->select([
+                'id',
+                'branch_name',
+                DB::raw('ST_X(location) as longitude'),
+                DB::raw('ST_Y(location) as latitude'),
+            ])
+            ->with([
+                'brand:id,name',
+            ])
+            ->withAvg('reviews', 'rating');
+
+        // Filter by category
+        if (!empty($filters['category_id'])) {
+            $query->whereHas('categories', function ($q) use ($filters) {
+                $q->where('categories.id', $filters['category_id']);
+            });
+        }
+
+        // Filter by city
+        if (!empty($filters['city_id'])) {
+            $query->where('city_id', $filters['city_id']);
+        }
+
+        // Filter by minimum rating
+        if (!empty($filters['min_rating'])) {
+            $query->having('reviews_avg_rating', '>=', $filters['min_rating']);
+        }
+
+        // Filter by maximum rating
+        if (!empty($filters['max_rating'])) {
+            $query->having('reviews_avg_rating', '<=', $filters['max_rating']);
+        }
+
+        return $query->get()->toArray();
     }
 
     /**

@@ -25,6 +25,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('restaurants')->group(function () {
     Route::get('/', [RestaurantDiscoveryController::class, 'index']);
     Route::get('/nearby', [RestaurantDiscoveryController::class, 'nearby']);
+    Route::get('/map', [RestaurantDiscoveryController::class, 'map']);
     Route::get('/{id}', [RestaurantDiscoveryController::class, 'show']);
 
     Route::get('/{id}/menu', [MenuController::class, 'getRestaurantMenu']);
