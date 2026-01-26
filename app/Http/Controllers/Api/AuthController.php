@@ -12,25 +12,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
-#[OA\Info(
-    version: "1.0.0",
-    title: "RestReviews Mobile API",
-    description: "API dokumentatsiya mobil ilova uchun - Restaurant sharhlari tizimi"
-)]
-#[OA\Server(
-    url: "http://localhost",
-    description: "Local Development Server"
-)]
-#[OA\Server(
-    url: "https://api.restreviews.uz",
-    description: "Production Server"
-)]
-#[OA\SecurityScheme(
-    securityScheme: "bearerAuth",
-    type: "http",
-    scheme: "bearer",
-    bearerFormat: "JWT"
-)]
 class AuthController extends Controller
 {
     protected EskizSmsService $smsService;
@@ -297,14 +278,11 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Mark code as used
         $verification->markAsUsed();
 
-        // Find or create client
         $client = Client::where('phone', $phone)->first();
 
         if (!$client) {
-            // New client - require name
             if (!$request->filled('first_name') || !$request->filled('last_name')) {
                 return response()->json([
                     'success' => false,

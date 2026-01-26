@@ -20,4 +20,28 @@ class Client extends Model
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    /**
+     * Get the reviews written by the client.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Get the client's favorite restaurants.
+     */
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /**
+     * Get the restaurants favorited by the client.
+     */
+    public function favoriteRestaurants()
+    {
+        return $this->belongsToMany(Restaurant::class, 'favorites');
+    }
 }

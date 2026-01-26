@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             CitySeeder::class,
             UserSeeder::class,
             RestaurantSeeder::class,
+            MenuPermissionsSeeder::class,
+            TestMenuSeeder::class,
         ]);
     }
 }

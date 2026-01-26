@@ -60,6 +60,31 @@ class Restaurant extends Model
         return $this->hasManyThrough(MenuItem::class, RestaurantMenuItem::class, 'restaurant_id', 'id', 'id', 'menu_item_id');
     }
 
+    public function restaurantMenuItems()
+    {
+        return $this->hasMany(RestaurantMenuItem::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    public function getReviewsCountAttribute()
+    {
+        return $this->reviews()->count();
+    }
+
 
     protected $casts = [
         'is_active' => 'boolean',

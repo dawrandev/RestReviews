@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('restaurant_images', function (Blueprint $table) {
+        Schema::create('favorites', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('restaurant_id')->constrained('restaurants')->onDelete('cascade');
-            $table->string('image_path');
-            $table->boolean('is_cover')->default(false);
-            $table->boolean('is_active')->default(true);
+            $table->foreignId('client_id')->constrained()->onDelete('cascade');
+            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+
+            $table->unique(['client_id', 'restaurant_id']);
+
+            $table->index('client_id');
         });
     }
 
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('restaurant_images');
+        Schema::dropIfExists('favorites');
     }
 };

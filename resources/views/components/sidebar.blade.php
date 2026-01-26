@@ -81,8 +81,8 @@
                     </li>
                     @endif
 
-                    {{-- 5. Menu (Admin only: manages their brand's menu) --}}
-                    @if($user->hasRole('admin'))
+                    {{-- 5. Menu (Faqat restorani bor Adminlar uchun) --}}
+                    @if($user->hasRole('admin') && $hasRestaurant) {{-- BU YERGA $hasRestaurant QO'SHILDI --}}
                     <li class="sidebar-list {{ request()->routeIs('menu-sections.*') || request()->routeIs('menu-items.*') ? 'active' : '' }}">
                         <a class="sidebar-link sidebar-title" href="javascript:void(0)">
                             <i data-feather="book-open"></i><span>Меню</span>

@@ -17,4 +17,17 @@ class City extends Model
     {
         return $this->hasMany(CityTranslation::class);
     }
+
+    /**
+     * Get translated name based on current locale
+     */
+    public function getTranslatedName($locale = null)
+    {
+        $locale = $locale ?? app()->getLocale();
+
+        // Use loaded translations to avoid N+1 query
+        $translation = $this->translations->firstWhere('code', $locale);
+
+        return $translation ? $translation->name : null;
+    }
 }

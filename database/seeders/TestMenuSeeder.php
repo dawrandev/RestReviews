@@ -9,37 +9,63 @@ class TestMenuSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create menu sections for brand_id = 1 (Grand Lavash)
+        $brand = \App\Models\Brand::where('name', 'like', '%Grand Lavash%')->first()
+            ?? \App\Models\Brand::first();
+
         $sections = [
-            ['ru' => 'Салаты', 'uz' => 'Salatlar', 'en' => 'Salads', 'sort_order' => 1],
-            ['ru' => 'Супы', 'uz' => 'Sho\'rvalar', 'en' => 'Soups', 'sort_order' => 2],
-            ['ru' => 'Основные блюда', 'uz' => 'Asosiy taomlar', 'en' => 'Main Dishes', 'sort_order' => 3],
-            ['ru' => 'Напитки', 'uz' => 'Ichimliklar', 'en' => 'Beverages', 'sort_order' => 4],
-            ['ru' => 'Десерты', 'uz' => 'Shirinliklar', 'en' => 'Desserts', 'sort_order' => 5],
+            [
+                'ru' => 'Салаты',
+                'uz' => 'Salatlar',
+                'kk' => 'Salatlar',
+                'en' => 'Salads',
+                'sort_order' => 1
+            ],
+            [
+                'ru' => 'Супы',
+                'uz' => 'Sho\'rvalar',
+                'kk' => 'Sorpalar',
+                'en' => 'Soups',
+                'sort_order' => 2
+            ],
+            [
+                'ru' => 'Основные блюда',
+                'uz' => 'Asosiy taomlar',
+                'kk' => 'Tiykarǵı awqatlar',
+                'en' => 'Main Dishes',
+                'sort_order' => 3
+            ],
+            [
+                'ru' => 'Напитки',
+                'uz' => 'Ichimliklar',
+                'kk' => 'Ishimlikler',
+                'en' => 'Beverages',
+                'sort_order' => 4
+            ],
+            [
+                'ru' => 'Десерты',
+                'uz' => 'Shirinliklar',
+                'kk' => 'Shirinlikler',
+                'en' => 'Desserts',
+                'sort_order' => 5
+            ],
         ];
 
         foreach ($sections as $sectionData) {
             $section = MenuSection::create([
-                'brand_id' => 1,
+                'brand_id' => $brand->id,
                 'sort_order' => $sectionData['sort_order']
             ]);
 
-            $section->translations()->create([
-                'lang_code' => 'ru',
-                'name' => $sectionData['ru']
-            ]);
+            $languages = ['ru', 'uz', 'kk', 'en'];
 
-            $section->translations()->create([
-                'lang_code' => 'uz',
-                'name' => $sectionData['uz']
-            ]);
-
-            $section->translations()->create([
-                'lang_code' => 'en',
-                'name' => $sectionData['en']
-            ]);
+            foreach ($languages as $lang) {
+                $section->translations()->create([
+                    'lang_code' => $lang,
+                    'name' => $sectionData[$lang]
+                ]);
+            }
         }
 
-        $this->command->info('Test menu sections created successfully for Grand Lavash!');
+        $this->command->info("Test menu sections created successfully for {$brand->name}!");
     }
 }

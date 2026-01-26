@@ -14,9 +14,7 @@ return new class extends Migration
         Schema::create('menu_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('menu_section_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->string('image_path');
+            $table->string('image_path')->nullable();
             $table->decimal('base_price', 8, 2);
             $table->timestamps();
         });

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('menu_sections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('brand_id')->constrained()->onDelete('cascade');
-            $table->string('name');
             $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
