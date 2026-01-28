@@ -19,14 +19,20 @@ class ReviewController extends Controller
 
         $user = $request->user();
         $rating = $request->input('rating');
+        $restaurantId = $request->input('restaurant_id');
 
-        // Get reviews based on user role
+        // Get reviews based on user role (20 per page)
         if ($user->hasRole('superadmin')) {
-            $reviews = $this->reviewService->getAllReviews(15, $rating);
+            $reviews = $this->reviewService->getAllReviews(20, $rating, $restaurantId);
             $statistics = $this->reviewService->getAllStatistics();
         } else {
-            $reviews = $this->reviewService->getReviewsForAdmin($user, 15, $rating);
+            $reviews = $this->reviewService->getReviewsForAdmin($user, 20, $rating);
             $statistics = $this->reviewService->getStatisticsForAdmin($user);
+        }
+
+        // AJAX request - return only the reviews list partial
+        if ($request->ajax() || $request->input('ajax')) {
+            return view('pages.reviews.partials.review-list', compact('reviews'))->render();
         }
 
         return view('pages.reviews.index', compact('reviews', 'statistics'));

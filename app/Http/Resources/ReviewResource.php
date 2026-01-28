@@ -14,13 +14,14 @@ class ReviewResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'client' => [
+            'client' => $this->client ? [
                 'id' => $this->client->id,
                 'full_name' => $this->client->full_name,
                 'image_path' => $this->client->image_path
                     ? asset('storage/' . $this->client->image_path)
                     : null,
-            ],
+            ] : null,
+            'is_guest' => $this->client_id === null,
             'restaurant_id' => $this->restaurant_id,
             'rating' => $this->rating,
             'comment' => $this->comment,

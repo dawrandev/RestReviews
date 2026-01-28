@@ -3,24 +3,19 @@
 @section('title', 'Отзывы и рейтинги')
 
 @push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 <style>
     .review-card {
         transition: all 0.2s ease;
-        border-left: 3px solid transparent;
     }
+
     .review-card:hover {
         box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
-        border-left-color: var(--bs-primary);
     }
-    #loading-overlay {
-        display: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255,255,255,0.8);
-        z-index: 100;
+
+    .select2-container {
+        width: 100% !important;
     }
 </style>
 @endpush
@@ -182,40 +177,92 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                <h5 class="mb-0">Все отзывы ({{ $reviews->total() }})</h5>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    @role('superadmin')
-                                    <select id="restaurant-filter" class="form-control" style="min-width: 250px;">
-                                        <option value="">Все рестораны</option>
-                                        @foreach(\App\Models\Restaurant::orderBy('branch_name')->get() as $restaurant)
-                                        <option value="{{ $restaurant->id }}" {{ request('restaurant_id') == $restaurant->id ? 'selected' : '' }}>
-                                            {{ $restaurant->branch_name }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                    @endrole
-                                    <select id="rating-filter" class="form-select form-select-sm" style="min-width: 150px;">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Все отзывы</h5>
+                                <form method="GET" action="{{ route('reviews.index') }}" class="d-flex gap-2">
+                                    <select name="rating" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
                                         <option value="">Все рейтинги</option>
-                                        <option value="5" {{ request('rating') == 5 ? 'selected' : '' }}>⭐⭐⭐⭐⭐ (5)</option>
-                                        <option value="4" {{ request('rating') == 4 ? 'selected' : '' }}>⭐⭐⭐⭐ (4)</option>
-                                        <option value="3" {{ request('rating') == 3 ? 'selected' : '' }}>⭐⭐⭐ (3)</option>
-                                        <option value="2" {{ request('rating') == 2 ? 'selected' : '' }}>⭐⭐ (2)</option>
-                                        <option value="1" {{ request('rating') == 1 ? 'selected' : '' }}>⭐ (1)</option>
+                                        <option value="5" {{ request('rating') == 5 ? 'selected' : '' }}>5 звезд</option>
+                                        <option value="4" {{ request('rating') == 4 ? 'selected' : '' }}>4 звезды</option>
+                                        <option value="3" {{ request('rating') == 3 ? 'selected' : '' }}>3 звезды</option>
+                                        <option value="2" {{ request('rating') == 2 ? 'selected' : '' }}>2 звезды</option>
+                                        <option value="1" {{ request('rating') == 1 ? 'selected' : '' }}>1 звезда</option>
                                     </select>
-                                </div>
+                                </form>
                             </div>
                         </div>
-                        <div class="card-body p-0 position-relative" style="min-height: 200px;">
-                            <div id="loading-overlay" class="d-flex align-items-center justify-content-center">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Загрузка...</span>
+                        <div class="card-body">
+                            @forelse($reviews as $review)
+                            <div class="card mb-3 border">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-2 text-center">
+                                            @if($review->client)
+                                            @if($review->client->image_path)
+                                            <img src="{{ asset('storage/' . $review->client->image_path) }}" alt="{{ $review->client->first_name }}" class="rounded-circle mb-2" style="width: 60px; height: 60px; object-fit: cover;">
+                                            @else
+                                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px; font-size: 24px;">
+                                                {{ strtoupper(substr($review->client->first_name, 0, 1)) }}
+                                            </div>
+                                            @endif
+                                            <div class="fw-bold">{{ $review->client->first_name }} {{ $review->client->last_name }}</div>
+                                            @else
+                                            <div class="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px; font-size: 24px;">
+                                                <i class="fa fa-user"></i>
+                                            </div>
+                                            <div class="fw-bold">Гость</div>
+                                            @endif
+                                            <small class="text-muted d-block mt-1">{{ $review->created_at->format('d.m.Y') }}</small>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="mb-2">
+                                                <span class="badge bg-secondary">{{ $review->restaurant->branch_name }}</span>
+                                                <span class="ms-2">
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        @if($i <=$review->rating)
+                                                        <i class="fa fa-star text-warning"></i>
+                                                        @else
+                                                        <i class="fa fa-star text-muted"></i>
+                                                        @endif
+                                                        @endfor
+                                                </span>
+                                            </div>
+                                            @if($review->comment)
+                                            <p class="mb-0">{{ $review->comment }}</p>
+                                            @else
+                                            <p class="mb-0 text-muted fst-italic">Комментарий отсутствует</p>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            @can('delete', $review)
+                                            <form id="delete-review-{{ $review->id }}" action="{{ route('reviews.destroy', $review->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button"
+                                                    class="btn btn-outline-danger btn-sm btn-delete-confirm"
+                                                    data-form-id="delete-review-{{ $review->id }}"
+                                                    data-title="Удалить отзыв?"
+                                                    data-text="Вы уверены, что хотите удалить этот отзыв?"
+                                                    data-confirm-text="Да, удалить"
+                                                    data-cancel-text="Отмена">
+                                                    <i class="fa fa-trash"></i> Удалить
+                                                </button>
+                                            </form>
+                                            @endcan
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div id="reviews-container">
-                                @include('pages.reviews.partials.review-list', ['reviews' => $reviews])
+                            @empty
+                            <div class="text-center py-5">
+                                <i class="fa fa-comments fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted">Отзывы не найдены</p>
                             </div>
+                            @endforelse
+                        </div>
+                        <div class="card-footer bg-white">
+                            {{ $reviews->links() }}
                         </div>
                     </div>
                 </div>
@@ -224,80 +271,3 @@
     </section>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-$(document).ready(function() {
-    // Initialize Select2 (Cuba Admin style)
-    @role('superadmin')
-    $('#restaurant-filter').select2({
-        placeholder: 'Выберите ресторан',
-        allowClear: true,
-        width: '100%'
-    });
-    @endrole
-
-    // AJAX Filter Function
-    function loadReviews(page = 1) {
-        const restaurantId = $('#restaurant-filter').length ? $('#restaurant-filter').val() : '';
-        const rating = $('#rating-filter').val();
-
-        $('#loading-overlay').show();
-
-        $.ajax({
-            url: '{{ route("reviews.index") }}',
-            type: 'GET',
-            data: {
-                restaurant_id: restaurantId,
-                rating: rating,
-                page: page,
-                ajax: 1
-            },
-            success: function(response) {
-                $('#reviews-container').html(response);
-                $('#loading-overlay').hide();
-
-                // Update URL without reload
-                const url = new URL(window.location);
-                if (restaurantId) {
-                    url.searchParams.set('restaurant_id', restaurantId);
-                } else {
-                    url.searchParams.delete('restaurant_id');
-                }
-                if (rating) {
-                    url.searchParams.set('rating', rating);
-                } else {
-                    url.searchParams.delete('rating');
-                }
-                url.searchParams.set('page', page);
-                window.history.pushState({}, '', url);
-            },
-            error: function() {
-                $('#loading-overlay').hide();
-                alert('Ошибка загрузки отзывов');
-            }
-        });
-    }
-
-    // Filter change events
-    @role('superadmin')
-    $('#restaurant-filter').on('change', function() {
-        loadReviews(1);
-    });
-    @endrole
-
-    $('#rating-filter').on('change', function() {
-        loadReviews(1);
-    });
-
-    // Pagination click handler (delegated)
-    $(document).on('click', '.pagination a', function(e) {
-        e.preventDefault();
-        const page = $(this).attr('href').split('page=')[1];
-        if (page) {
-            loadReviews(page);
-        }
-    });
-});
-</script>
-@endpush

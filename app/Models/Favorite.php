@@ -13,6 +13,8 @@ class Favorite extends Model
     protected $fillable = [
         'client_id',
         'restaurant_id',
+        'device_id',
+        'ip_address',
     ];
 
     /**

@@ -29,14 +29,26 @@ class ReviewService
     }
 
     /**
-     * Create or update a review.
+     * Create or update a review (with device tracking).
      */
-    public function createOrUpdateReview(int $clientId, int $restaurantId, array $data): Review
+    public function createOrUpdateReview(?int $clientId, int $restaurantId, array $data): Review
     {
-        $existingReview = $this->reviewRepository->findByClientAndRestaurant($clientId, $restaurantId);
+        // If client is authenticated, check by client_id
+        if ($clientId) {
+            $existingReview = $this->reviewRepository->findByClientAndRestaurant($clientId, $restaurantId);
 
-        if ($existingReview) {
-            return $this->reviewRepository->update($existingReview, $data);
+            if ($existingReview) {
+                return $this->reviewRepository->update($existingReview, $data);
+            }
+        }
+
+        // For guests or new reviews, check by device_id
+        $existingReviewByDevice = Review::where('device_id', $data['device_id'])
+            ->where('restaurant_id', $restaurantId)
+            ->first();
+
+        if ($existingReviewByDevice) {
+            return $this->reviewRepository->update($existingReviewByDevice, $data);
         }
 
         return $this->reviewRepository->create([
@@ -75,13 +87,34 @@ class ReviewService
     }
 
     /**
-     * Check if client can review a restaurant.
+     * Check if device can review (rate limiting: 3 reviews per day per restaurant).
      */
-    public function canClientReview(int $clientId, int $restaurantId): bool
+    public function canDeviceReview(string $deviceId, string $ipAddress, int $restaurantId): array
     {
-        // For now, any authenticated client can review
-        // You can add additional logic here (e.g., check if they've visited)
-        return true;
+        $today = now()->startOfDay();
+
+        // Count reviews from this device and IP in the last 24 hours
+        $reviewCount = Review::where('device_id', $deviceId)
+            ->where('restaurant_id', $restaurantId)
+            ->where('created_at', '>=', $today)
+            ->count();
+
+        $ipReviewCount = Review::where('ip_address', $ipAddress)
+            ->where('restaurant_id', $restaurantId)
+            ->where('created_at', '>=', $today)
+            ->count();
+
+        // Maximum 3 reviews per day per restaurant
+        $maxReviews = 3;
+        $canReview = $reviewCount < $maxReviews && $ipReviewCount < $maxReviews;
+
+        return [
+            'can_review' => $canReview,
+            'reviews_count' => $reviewCount,
+            'ip_reviews_count' => $ipReviewCount,
+            'remaining' => $canReview ? ($maxReviews - max($reviewCount, $ipReviewCount)) : 0,
+            'reset_at' => now()->endOfDay()->toIso8601String(),
+        ];
     }
 
     /**
@@ -96,9 +129,9 @@ class ReviewService
     /**
      * Get all reviews (for superadmin)
      */
-    public function getAllReviews(int $perPage = 15, ?int $rating = null): LengthAwarePaginator
+    public function getAllReviews(int $perPage = 15, ?int $rating = null, ?int $restaurantId = null): LengthAwarePaginator
     {
-        return $this->reviewRepository->getAllPaginated($perPage, $rating);
+        return $this->reviewRepository->getAllPaginated($perPage, $rating, $restaurantId);
     }
 
     /**

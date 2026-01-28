@@ -37,6 +37,16 @@ Route::get('/menu-items/{id}', [MenuController::class, 'show']);
 
 Route::get('/search', [SearchController::class, 'search']);
 
+// Reviews (now guest-friendly with device tracking)
+Route::prefix('restaurants')->group(function () {
+    Route::post('/{id}/reviews', [ReviewController::class, 'store'])->middleware('throttle:10,1'); // 10 requests per minute
+});
+
+// Favorites (guest-friendly with device tracking)
+Route::prefix('restaurants')->group(function () {
+    Route::post('/{id}/favorite', [FavoriteController::class, 'toggle'])->middleware('throttle:20,1');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Protected API Routes (Authentication Required)
@@ -50,20 +60,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 
-    // Reviews (write operations)
-    Route::prefix('restaurants')->group(function () {
-        Route::post('/{id}/reviews', [ReviewController::class, 'store']);
-    });
-
+    // Reviews (update/delete only for authenticated users)
     Route::prefix('reviews')->group(function () {
         Route::put('/{id}', [ReviewController::class, 'update']);
         Route::delete('/{id}', [ReviewController::class, 'destroy']);
     });
 
-    // Favorites
-    Route::prefix('restaurants')->group(function () {
-        Route::post('/{id}/favorite', [FavoriteController::class, 'toggle']);
-    });
-
+    // Favorites list (authenticated only)
     Route::get('/favorites', [FavoriteController::class, 'index']);
 });

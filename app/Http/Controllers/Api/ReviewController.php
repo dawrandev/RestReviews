@@ -64,14 +64,20 @@ class ReviewController extends Controller
 
     #[OA\Post(
         path: '/api/restaurants/{id}/reviews',
-        summary: 'Create or update a review',
-        security: [['sanctum' => []]],
+        summary: 'Create or update a review (guest-friendly)',
         tags: ['Reviews'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['rating'],
+                required: ['device_id', 'rating'],
                 properties: [
+                    new OA\Property(
+                        property: 'device_id',
+                        type: 'string',
+                        description: 'Qurilma ID (UUID yoki fingerprint)',
+                        maxLength: 100,
+                        example: '550e8400-e29b-41d4-a716-446655440000'
+                    ),
                     new OA\Property(
                         property: 'rating',
                         type: 'integer',
@@ -107,29 +113,63 @@ class ReviewController extends Controller
                 )
             ),
             new OA\Response(
-                response: 401,
-                description: 'Unauthenticated'
-            ),
-            new OA\Response(
                 response: 422,
                 description: 'Validation error'
+            ),
+            new OA\Response(
+                response: 429,
+                description: 'Rate limit exceeded (3 reviews per day per restaurant)',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Siz bugun bu restoranga maksimal miqdorda sharh qoldirdingiz. Ertaga qayta urinib ko\'ring.'),
+                        new OA\Property(property: 'rate_limit', type: 'object', properties: [
+                            new OA\Property(property: 'reviews_count', type: 'integer'),
+                            new OA\Property(property: 'remaining', type: 'integer'),
+                            new OA\Property(property: 'reset_at', type: 'string'),
+                        ]),
+                    ]
+                )
             )
         ]
     )]
     public function store(StoreReviewRequest $request, int $restaurantId): JsonResponse
     {
-        $client = $request->user();
+        $validated = $request->validated();
+        $deviceId = $validated['device_id'];
+        $ipAddress = $request->ip();
+
+        // Check rate limiting
+        $rateLimitCheck = $this->reviewService->canDeviceReview($deviceId, $ipAddress, $restaurantId);
+
+        if (!$rateLimitCheck['can_review']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Siz bugun bu restoranga maksimal miqdorda sharh qoldirdingiz. Ertaga qayta urinib ko\'ring.',
+                'rate_limit' => $rateLimitCheck,
+            ], 429);
+        }
+
+        // Get authenticated client if exists (nullable for guest support)
+        $clientId = $request->user()?->id;
 
         $review = $this->reviewService->createOrUpdateReview(
-            $client->id,
+            $clientId,
             $restaurantId,
-            $request->validated()
+            [
+                ...$validated,
+                'ip_address' => $ipAddress,
+            ]
         );
 
         return response()->json([
             'success' => true,
             'message' => 'Fikr-mulohaza muvaffaqiyatli saqlandi',
             'data' => new ReviewResource($review),
+            'rate_limit' => [
+                'remaining' => $rateLimitCheck['remaining'] - 1,
+                'reset_at' => $rateLimitCheck['reset_at'],
+            ],
         ], 201);
     }
 

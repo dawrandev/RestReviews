@@ -13,6 +13,8 @@ class Review extends Model
     protected $fillable = [
         'client_id',
         'restaurant_id',
+        'device_id',
+        'ip_address',
         'rating',
         'comment',
     ];

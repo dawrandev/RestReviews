@@ -80,9 +80,23 @@ class FavoriteController extends Controller
 
     #[OA\Post(
         path: '/api/restaurants/{id}/favorite',
-        summary: 'Toggle favorite status',
-        security: [['sanctum' => []]],
+        summary: 'Toggle favorite status (guest-friendly)',
         tags: ['Favorites'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['device_id'],
+                properties: [
+                    new OA\Property(
+                        property: 'device_id',
+                        type: 'string',
+                        description: 'Qurilma ID (UUID yoki fingerprint)',
+                        maxLength: 100,
+                        example: '550e8400-e29b-41d4-a716-446655440000'
+                    )
+                ]
+            )
+        ),
         parameters: [
             new OA\Parameter(
                 name: 'id',
@@ -114,14 +128,21 @@ class FavoriteController extends Controller
                 description: 'Restaurant not found'
             ),
             new OA\Response(
-                response: 401,
-                description: 'Unauthenticated'
+                response: 422,
+                description: 'Validation error'
             )
         ]
     )]
     public function toggle(Request $request, int $restaurantId): JsonResponse
     {
-        $client = $request->user();
+        // Validate device_id
+        $request->validate([
+            'device_id' => ['required', 'string', 'max:100'],
+        ], [
+            'device_id.required' => 'Qurilma identifikatori majburiy.',
+            'device_id.string' => 'Qurilma identifikatori to\'g\'ri formatda emas.',
+            'device_id.max' => 'Qurilma identifikatori juda uzun.',
+        ]);
 
         $restaurant = \App\Models\Restaurant::find($restaurantId);
         if (!$restaurant) {
@@ -131,7 +152,12 @@ class FavoriteController extends Controller
             ], 404);
         }
 
-        $result = $this->favoriteService->toggleFavorite($client->id, $restaurantId);
+        // Get authenticated client if exists (nullable for guest support)
+        $clientId = $request->user()?->id;
+        $deviceId = $request->input('device_id');
+        $ipAddress = $request->ip();
+
+        $result = $this->favoriteService->toggleFavorite($clientId, $restaurantId, $deviceId, $ipAddress);
 
         return response()->json([
             'success' => true,

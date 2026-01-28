@@ -20,11 +20,19 @@ class FavoriteService
     }
 
     /**
-     * Toggle favorite status for a restaurant.
+     * Toggle favorite status for a restaurant (with device tracking).
      */
-    public function toggleFavorite(int $clientId, int $restaurantId): array
+    public function toggleFavorite(?int $clientId, int $restaurantId, string $deviceId, string $ipAddress): array
     {
-        $favorite = $this->favoriteRepository->findByClientAndRestaurant($clientId, $restaurantId);
+        // Check by device_id first
+        $favorite = \App\Models\Favorite::where('device_id', $deviceId)
+            ->where('restaurant_id', $restaurantId)
+            ->first();
+
+        // If authenticated and not found by device, check by client_id
+        if (!$favorite && $clientId) {
+            $favorite = $this->favoriteRepository->findByClientAndRestaurant($clientId, $restaurantId);
+        }
 
         if ($favorite) {
             $this->favoriteRepository->delete($favorite);
@@ -37,6 +45,8 @@ class FavoriteService
         $this->favoriteRepository->create([
             'client_id' => $clientId,
             'restaurant_id' => $restaurantId,
+            'device_id' => $deviceId,
+            'ip_address' => $ipAddress,
         ]);
 
         return [

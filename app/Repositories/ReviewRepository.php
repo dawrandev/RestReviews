@@ -127,12 +127,16 @@ class ReviewRepository
     /**
      * Get all reviews paginated (for superadmin)
      */
-    public function getAllPaginated(int $perPage = 15, ?int $rating = null): LengthAwarePaginator
+    public function getAllPaginated(int $perPage = 15, ?int $rating = null, ?int $restaurantId = null): LengthAwarePaginator
     {
         $query = Review::with(['client:id,first_name,last_name,image_path', 'restaurant:id,branch_name']);
 
         if ($rating) {
             $query->where('rating', $rating);
+        }
+
+        if ($restaurantId) {
+            $query->where('restaurant_id', $restaurantId);
         }
 
         return $query->orderBy('created_at', 'desc')->paginate($perPage);

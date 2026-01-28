@@ -20,6 +20,10 @@ use OpenApi\Attributes as OA;
     url: 'http://localhost:8000',
     description: 'Local Development Server'
 )]
+#[OA\Server(
+    url: 'http://restreviews.test',
+    description: 'Laragon Server'
+)]
 #[OA\SecurityScheme(
     securityScheme: 'bearerAuth',
     type: 'http',
